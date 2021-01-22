@@ -61,7 +61,7 @@ for pair_name in pair_names:
 
     pair = mid_price.loc[:, pair_name]
 
-    method = 'mra'
+    method = 'w_la8_1'
     result_mra = get_stats(pair, method, pair_name)
     method = 'std'
     result_std = get_stats(pair, method, pair_name)
