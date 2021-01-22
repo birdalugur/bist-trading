@@ -60,6 +60,35 @@ def rollPair(pair, window, intercept=False, w_la8_1=False):
     return pd.Series(all_values, index=all_idx, name=name)
 
 
+def rollPair2(pair, window: pd.DateOffset, agg_func='last', intercept=False, w_la8_1=False):
+    window_times = rolling_times(pair.index, window)
+    result_times = []
+    result_values = []
+    for time in window_times:
+        start = time[0]
+        end = time[1]
+        result_times.append(end)
+        _residuals = get_resid(pair.loc[start:end], intercept, w_la8_1)
+        _residual = apply_func(_residuals, agg_func)
+        result_values.append(_residual)
+
+    return pd.Series(data=result_values, index=result_times)
+
+
+def apply_func(data: pd.Series, func: str) -> float:
+    if func == 'last':
+        return data.tail(1).values[0]
+
+
+def rolling_times(time_series: pd.DatetimeIndex, window: pd.DateOffset):
+    """Creates time pairs for the rolling operation."""
+    start_times = time_series.drop(time_series.to_series().last(window))
+
+    end_times = start_times + window
+    return list(zip(start_times, end_times))
+
+
+
 def expand(pair, window=pd.DateOffset(minutes=5), intercept=False, w_la8_1=False):
     window_type = window.kwds.popitem()[0]
     window_val = window.kwds.popitem()[1]  # window değeri
