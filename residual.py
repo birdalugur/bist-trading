@@ -71,8 +71,9 @@ def rollPair2(pair, window: pd.DateOffset, agg_func='last', intercept=False, w_l
         _residuals = get_resid(pair.loc[start:end], intercept, w_la8_1)
         _residual = apply_func(_residuals, agg_func)
         result_values.append(_residual)
+    results = pd.Series(data=result_values, index=result_times).reindex(pair.index)
 
-    return pd.Series(data=result_values, index=result_times)
+    return results
 
 
 def apply_func(data: pd.Series, func: str) -> float:
@@ -83,7 +84,6 @@ def apply_func(data: pd.Series, func: str) -> float:
 def rolling_times(time_series: pd.DatetimeIndex, window: pd.DateOffset):
     """Creates time pairs for the rolling operation."""
     start_times = time_series.drop(time_series.to_series().last(window))
-
     end_times = start_times + window
     return list(zip(start_times, end_times))
 

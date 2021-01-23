@@ -17,41 +17,27 @@ import selling
 
 # ## Read data
 
-
 folder_path = '/home/ugur/bistlmts/data/BIST_Eylul/'
 
 data = mydata.read(folder_path)
 
-# ## Calculate the middle price
-
-
-data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
-
-# Create a pivot table using mid price, symbol and time, if two
-mid_price = data.pivot_table(index='time', columns='symbol', values='mid_price', aggfunc='mean')
-
-# Convert to 1 minute data for every day (agg func = mean, alternatives: median;...)
-mid_price = mid_price.groupby(pd.Grouper(freq='D')).resample('1Min').mean().droplevel(0)
-
-# fill nan values (ignore end of the day)
-mid_price = mid_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill()))
-mid_price = mid_price.droplevel(0)
+data = mydata.mid_price(data, agg_time='5Min')
 
 # ## Select a pair
 
-
 pair_name = mydata.pair_names[0]
 
-pair = mid_price.loc[:, pair_name]
+pair = data.loc[:, pair_name]
 
 method = 'std'
 
-residuals = residual.rollPair(pair, 50, intercept=False, w_la8_1=True)
-residuals = residual.expand(pair, window=pd.DateOffset(minutes=5), intercept=False, w_la8_1=True)
+residuals = residual.rollPair2(pair, window=pd.DateOffset(minutes=30), intercept=False, w_la8_1=False)
+
+# residuals = residual.expand(pair, window=pd.DateOffset(minutes=5), intercept=False, w_la8_1=True)
+
 # ## Calculate std
 
-
-std = residuals.rolling(window=50, min_periods=0).std().rename('std')
+std = residuals.rolling(window='30Min', min_periods=0).std().rename('std')
 
 # ## Find signals
 
@@ -211,111 +197,14 @@ c_return_per_trade = c_return / number_trades
 
 cols = ['c_return', 'c_return_per_trade', 'number_trades', 'duration_trades_mean', 'duration_trades_median']
 
-stats_name = '_'.join(pair_name) + '_std'
+stats_name = '_'.join(pair_name) + 'standart'
 
 stats = pd.DataFrame([[c_return, c_return_per_trade, number_trades, duration_trades_mean, duration_trades_median]
                       ], columns=cols, index=[stats_name],
                      )
 
+stats2 = stats.copy()
+
 stats
 
-# ## Visualize results
-
-
-import plotly.graph_objects as go
-
-bar = go.Figure(go.Bar(name='last trade', x=last_return_total.index, y=last_return_total.values))
-
-bar.show()
-
-# ### Cumulative return
-
-
-fig_ctotal = go.Figure()
-
-fig_ct = go.Scatter(x=c_return_total.index, y=c_return_total, mode='lines', name='total cumulative return')
-
-fig_ctotal.add_trace(fig_ct)
-fig_ctotal.show()
-
-# fig_cum_return = go.Figure()
-#
-# fig_s1 = go.Scatter(x=c_return_s1.index, y=c_return_s1, mode='lines', name='cumulative return s1')
-#
-# fig_s2 = go.Scatter(x=c_return_s2.index, y=c_return_s2, mode='lines', name='cumulative return s2')
-#
-# fig_cum_return.update_layout(xaxis_title='time', yaxis_title='cumulative return')
-#
-# fig_cum_return.add_traces([fig_s1, fig_s2])
-#
-# fig_cum_return.show()
-
-# # Variables
-# # ---------
-# 
-# pair,    # mid price
-# residual,
-# std, 
-# signal_1,
-# signal_2,
-# 
-# # Tradelerin başlangıç ve bitişini gösteren DatetimeIndex.
-# entry_points_s1,
-# entry_points_s2,
-# exit_points_1,
-# exit_points_2,
-# 
-# # (exit-entry)/entry ile hesaplanmış tüm returnler.
-# return_short_s1,
-# return_short_s2,
-# return_long_s1,
-# return_long_s2,
-# 
-# return_s1,
-# return_s2,
-# return_total,
-# 
-# # Last of trades.
-# last_return_short_s1,
-# last_return_long_s1,
-# last_return_short_s2,
-# last_return_long_s2,
-# 
-# last_return_s1,   # last_return_short_s1+last_return_long_s1
-# last_return_s2,
-# last_return_total,
-# 
-# # Number of trades
-# lastnumber_return_1,
-# lastnumber_return_2,
-# 
-# number_return_1,
-# number_return_2,
-# 
-# # Cumulative
-# c_return_short_s1,
-# c_return_long_s1,
-# c_return_short_s2,
-# c_return_long_s2,
-# 
-# c_return_s1, # c_return_short_s1 + c_return_long_s1
-# c_return_s2,
-# c_return_total,
-# 
-# # Median
-# median_s1,
-# median_s2,
-# median_total,
-# 
-# median_duration_s1,
-# median_duration_s2,
-# 
-# # Mean
-# mean_ctotal,
-# mean_cs1,
-# mean_cs2,
-# 
-# avg_duration_s1,
-# avg_duration_s2
-# 
-# None
+pd.concat([stats2, stats]).to_csv('results.csv')
