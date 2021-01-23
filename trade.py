@@ -55,8 +55,6 @@ entry_points_s2, exit_points_2 = selling.signal_points(signal_2)
 
 entry_points, exit_points = selling.signal_points(all_signal)
 
-entry_points = entry_points[0:len(exit_points)]
-
 entry_exit = list(zip(entry_points, exit_points))
 
 # ## Calculation long / short selling
