@@ -9,11 +9,13 @@ from itertools import combinations
 import statsmodels.api as sm
 import random
 import plotly.express as px
+from importlib import reload
 
 import mydata
 import wavelets
 import residual
 import selling
+import rolling
 
 # ## Read data
 
@@ -29,25 +31,26 @@ pair_name = mydata.pair_names[0]
 
 pair = data.loc[:, pair_name]
 
-method = 'std'
+window_size = pd.Timedelta(minutes=30)
 
-residuals = residual.rollPair2(pair, window=pd.DateOffset(minutes=30), intercept=False, w_la8_1=False)
+all_windows = rolling.windows(pair, window_size)  # create all windows
 
-# residuals = residual.expand(pair, window=pd.DateOffset(minutes=5), intercept=False, w_la8_1=True)
+# calculate residuals from windows
+residuals = list(map(lambda w: residual.get_resid(w, intercept=False, w_la8_1=False), all_windows))
 
-# ## Calculate std
+residuals = pd.concat(map(lambda r: r.tail(1), residuals)).reindex(pair.index)  # get last values
 
-std = residuals.rolling(window='30Min', min_periods=0).std().rename('std')
+# Calculate std
 
-# ## Find signals
+std = rolling.std(residuals, window_size).reindex(pair.index)
 
+# Find signals
 
 signal_1, signal_2 = selling.get_signal(residuals, std)
 
 all_signal = pd.Series([i or j for i, j in zip(signal_1, signal_2)], index=signal_1.index)
 
-# ## Mark entry - exit points
-
+# Mark entry - exit points
 
 entry_points_s1, exit_points_1 = selling.signal_points(signal_1)
 
@@ -74,8 +77,7 @@ return_s2 = return_short_s2 + return_long_s2
 
 return_total = return_s1.append(return_s2).sort_index()
 
-# ## All Trades
-
+# All Trades
 
 returns = return_total.dropna()
 
@@ -86,11 +88,12 @@ for start, end in entry_exit:
 
 duration = [end - start for start, end in entry_exit]
 
+
 # ## Last of Trades
 
-
-# Her bir trade'i numaralandır, NaN'ları hariç tutar
-get_trade_number = lambda x: (~(x.isna().cumsum()[x.notna()].duplicated())).cumsum()
+def get_trade_number(x):
+    """Her bir trade'i numaralandır, NaN'ları hariç tutar."""
+    return (~(x.isna().cumsum()[x.notna()].duplicated())).cumsum()
 
 
 def last_of_trade(trade):
@@ -195,14 +198,10 @@ c_return_per_trade = c_return / number_trades
 
 cols = ['c_return', 'c_return_per_trade', 'number_trades', 'duration_trades_mean', 'duration_trades_median']
 
-stats_name = '_'.join(pair_name) + 'standart'
+stats_name = '_'.join(pair_name) + '_standart'
 
 stats = pd.DataFrame([[c_return, c_return_per_trade, number_trades, duration_trades_mean, duration_trades_median]
                       ], columns=cols, index=[stats_name],
                      )
 
-stats2 = stats.copy()
-
 stats
-
-pd.concat([stats2, stats]).to_csv('results.csv')

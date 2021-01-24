@@ -22,6 +22,8 @@ def get_resid(pair, intercept=False, w_la8_1=False):
     first = pair.iloc[:, 0]
     second = pair.iloc[:, 1]
 
+    idx = pair.index
+
     name = '_'.join((first.name, second.name))
 
     if w_la8_1:
@@ -30,8 +32,9 @@ def get_resid(pair, intercept=False, w_la8_1=False):
 
     resids = residuals(first, second, intercept)
     resids.name = name
-    return resids
+    resids.index = idx
 
+    return resids
 
 
 def rollPair(pair, window, intercept=False, w_la8_1=False):
@@ -61,7 +64,7 @@ def rollPair(pair, window, intercept=False, w_la8_1=False):
 
 
 def rollPair2(pair, window: pd.DateOffset, agg_func='last', intercept=False, w_la8_1=False):
-    window_times = rolling_times(pair.index, window)
+    window_times = __rolling_times2(pair.index, window)
     result_times = []
     result_values = []
     for time in window_times:
@@ -69,24 +72,35 @@ def rollPair2(pair, window: pd.DateOffset, agg_func='last', intercept=False, w_l
         end = time[1]
         result_times.append(end)
         _residuals = get_resid(pair.loc[start:end], intercept, w_la8_1)
-        _residual = apply_func(_residuals, agg_func)
+        _residual = __apply_func(_residuals, agg_func)
         result_values.append(_residual)
     results = pd.Series(data=result_values, index=result_times).reindex(pair.index)
 
     return results
 
 
-def apply_func(data: pd.Series, func: str) -> float:
+def __apply_func(data: pd.Series, func: str) -> float:
     if func == 'last':
         return data.tail(1).values[0]
 
 
-def rolling_times(time_series: pd.DatetimeIndex, window: pd.DateOffset):
+def __rolling_times(time_series: pd.DatetimeIndex, window: pd.DateOffset):
     """Creates time pairs for the rolling operation."""
     start_times = time_series.drop(time_series.to_series().last(window))
     end_times = start_times + window
     return list(zip(start_times, end_times))
 
+
+def __rolling_times2(time_series, window=pd.Timedelta(minutes=30)):
+    """window/freq=shift value"""
+    data_frequency = pd.Series(time_series).diff()[2]
+    window_size = window / data_frequency
+    start_times = pd.Series(time_series)
+    end_times = start_times.shift(-int(window_size))
+    joined_times = pd.concat([start_times, end_times], axis=1).dropna()
+    all_windows = list(zip(joined_times.iloc[:, 0], joined_times.iloc[:, 1]))
+
+    return all_windows
 
 
 def expand(pair, window=pd.DateOffset(minutes=5), intercept=False, w_la8_1=False):
