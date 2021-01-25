@@ -14,6 +14,9 @@ import rolling
 
 
 def get_stats(pair, window_size, pair_name):
+
+    print(pair_name)
+
     all_windows = rolling.windows(pair, window_size)  # create all windows
 
     # calculate residuals from windows

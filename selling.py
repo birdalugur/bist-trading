@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 
+
 def get_signal(x, thresholds=[]):
     signal_1, signal_2 = [], []
 
@@ -75,7 +76,7 @@ def selling_series(data):
         _exit = data.iloc[_out]
         res = (_exit - _entry) / _entry
         result.append(res)
-    result.insert(0, None)
+    result.insert(0, np.nan)
     result = pd.Series(result, index=idx)
     return result
 
