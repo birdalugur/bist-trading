@@ -29,9 +29,9 @@ data = mydata.mid_price(data, agg_time='5Min')
 
 pair_name = mydata.pair_names[0]
 
-pair = data.loc[:, pair_name]
-
 window_size = pd.Timedelta(minutes=30)
+
+pair = data.loc[:, pair_name]
 
 all_windows = rolling.windows(pair, window_size)  # create all windows
 
