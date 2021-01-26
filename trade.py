@@ -16,6 +16,7 @@ import wavelets
 import residual
 import selling
 import rolling
+import plot
 
 # ## Read data
 
@@ -27,22 +28,27 @@ data = mydata.mid_price(data, agg_time='5Min')
 
 # ## Select a pair
 
-pair_name = mydata.pair_names[0]
-
-window_size = pd.Timedelta(minutes=30)
-
+pair_name = mydata.pair_names[9]
 pair = data.loc[:, pair_name]
 
-all_windows = rolling.windows(pair, window_size)  # create all windows
+window_size = 100
+threshold_coefficient = 1
+stats_type = 'standart'
+intercept = False
+w_la8_1 = False
+
+all_windows = rolling.windows(pair, 100)  # create all windows
 
 # calculate residuals from windows
-residuals = list(map(lambda w: residual.get_resid(w, intercept=False, w_la8_1=False), all_windows))
+residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
+
+std = [resid.std() for resid in residuals]
 
 residuals = pd.concat(map(lambda r: r.tail(1), residuals)).reindex(pair.index)  # get last values
 
 # Calculate std
 
-std = rolling.std(residuals, window_size).reindex(pair.index)
+std = pd.Series(std, index=residuals.dropna().index).reindex(pair.index) * threshold_coefficient
 
 # Find signals
 
@@ -87,6 +93,9 @@ for start, end in entry_exit:
     trades.append(returns.loc[start:end])
 
 duration = [end - start for start, end in entry_exit]
+
+fig = plot.trades(residuals, std, trades)
+pd.concat([pair, residuals, std, signal_1, signal_2], axis=1).to_csv('residual.csv')
 
 
 # ## Last of Trades
@@ -198,7 +207,7 @@ c_return_per_trade = c_return / number_trades
 
 cols = ['c_return', 'c_return_per_trade', 'number_trades', 'duration_trades_mean', 'duration_trades_median']
 
-stats_name = '_'.join(pair_name) + '_standart'
+stats_name = '_'.join(pair_name) + '_' + stats_type
 
 stats = pd.DataFrame([[c_return, c_return_per_trade, number_trades, duration_trades_mean, duration_trades_median]
                       ], columns=cols, index=[stats_name],

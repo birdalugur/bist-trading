@@ -31,7 +31,7 @@ data = mydata.mid_price(data, agg_time='5Min')
 
 pair_names = mydata.pair_names[0:2]
 
-window_size = pd.Timedelta(minutes=30)
+window_size = 100
 
 all_results = []
 
