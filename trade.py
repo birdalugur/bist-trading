@@ -32,12 +32,13 @@ pair_name = mydata.pair_names[9]
 pair = data.loc[:, pair_name]
 
 window_size = 100
-threshold_coefficient = 1
+threshold = 1
+
 stats_type = 'standart'
-intercept = True
+intercept = False
 w_la8_1 = False
 
-all_windows = rolling.windows(pair, 100)  # create all windows
+all_windows = rolling.windows(pair, window_size)  # create all windows
 
 # calculate residuals from windows
 residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
@@ -51,7 +52,7 @@ residuals = pd.concat(map(lambda r: r.tail(1), residuals))  # get last values
 std = pd.Series(std, index=residuals.index)
 
 residuals = residuals.dropna().reindex(pair.index)
-std = std.dropna().reindex(pair.index) * threshold_coefficient
+std = std.dropna().reindex(pair.index) * threshold
 
 # Find signals
 
@@ -98,7 +99,7 @@ for start, end in entry_exit:
 duration = [end - start for start, end in entry_exit]
 
 
-pd.concat([pair, residuals, std, signal_1, signal_2], axis=1).to_csv('residual.csv')
+# pd.concat([pair, residuals, std, signal_1, signal_2], axis=1).to_csv('residual.csv')
 
 
 # ## Last of Trades
