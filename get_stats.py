@@ -129,7 +129,7 @@ def get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1):
 
     c_return_total = last_return_total.cumsum()
 
-    fig = plot.trades(residuals, std, trades, c_return_total * 10)
+    fig = plot.trades(residuals, std, trades, pair_name, c_return_total * 10)
 
     # ## Stats
 

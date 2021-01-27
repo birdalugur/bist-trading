@@ -1,24 +1,28 @@
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.offline import plot
+import os
 
 pio.renderers.default = "browser"
+if 'graph' not in os.listdir():
+    os.mkdir('graph')
 
 
-# TODO: grafikten haftasonları kaldırılacak
-def trades(data, threshold, trades: list, creturn):
+def trades(data, threshold, trades: list, name, creturn):
     fig = go.Figure()
     line_1 = go.Scatter(x=data.index, y=data, mode='lines', name='residuals')
     line_2 = go.Scatter(x=threshold.index, y=threshold, mode='lines', name='threshold')
+    line_3 = go.Scatter(x=creturn.index, y=creturn, mode='lines', name='cumsum')
     line_mirror = go.Scatter(x=threshold.index, y=-threshold, mode='lines', name='threshold_mirror', line_color='red')
+    fig.add_traces([line_1, line_2, line_mirror, line_3])
 
-    c = go.Scatter(x=creturn.index, y=creturn, mode='lines', name='cumsun')
-    fig.add_traces([line_1, line_2, line_mirror, c])
     count = 0
     for trade in trades:
         count = count + 1
         sctr = go.Bar(x=trade.index, y=trade * 10, marker_color='black', name='trade_' + str(count))
         fig.add_trace(sctr)
-    return fig
+    plot(fig, auto_open=False, filename= 'graph/' + '_'.join(name)+'.html')
+
 
 #
 # import plotly.graph_objects as go

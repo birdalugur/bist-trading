@@ -159,7 +159,7 @@ c_return_s2 = c_return_short_s2 + c_return_long_s2
 c_return_total = last_return_total.cumsum()
 
 
-fig = plot.trades(residuals, std, trades, c_return_total*10)
+fig = plot.trades(residuals, std, trades, pair_name, c_return_total * 10)
 
 
 # ## Stats
