@@ -1,21 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+intercept = True
 
-import numpy as np
+
 import pandas as pd
-from typing import Union
-from itertools import combinations
-import statsmodels.api as sm
-import random
-import plotly.express as px
-from importlib import reload
 
 import mydata
-import wavelets
-import residual
-import selling
-import rolling
 
 from get_stats import get_stats
 
@@ -36,7 +27,6 @@ window_size = 100
 all_results = []
 
 for pair_name in pair_names:
-
     pair = data.loc[:, pair_name]
 
     result_std = get_stats(pair, window_size, pair_name)

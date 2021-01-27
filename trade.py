@@ -34,7 +34,7 @@ pair = data.loc[:, pair_name]
 window_size = 100
 threshold_coefficient = 1
 stats_type = 'standart'
-intercept = False
+intercept = True
 w_la8_1 = False
 
 all_windows = rolling.windows(pair, 100)  # create all windows
@@ -44,11 +44,14 @@ residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_
 
 std = [resid.std() for resid in residuals]
 
-residuals = pd.concat(map(lambda r: r.tail(1), residuals)).reindex(pair.index)  # get last values
+residuals = pd.concat(map(lambda r: r.tail(1), residuals))  # get last values
 
 # Calculate std
 
-std = pd.Series(std, index=residuals.dropna().index).reindex(pair.index) * threshold_coefficient
+std = pd.Series(std, index=residuals.index)
+
+residuals = residuals.dropna().reindex(pair.index)
+std = std.dropna().reindex(pair.index) * threshold_coefficient
 
 # Find signals
 
@@ -94,7 +97,7 @@ for start, end in entry_exit:
 
 duration = [end - start for start, end in entry_exit]
 
-fig = plot.trades(residuals, std, trades)
+
 pd.concat([pair, residuals, std, signal_1, signal_2], axis=1).to_csv('residual.csv')
 
 
@@ -153,6 +156,10 @@ c_return_s1 = c_return_short_s1 + c_return_long_s1
 c_return_s2 = c_return_short_s2 + c_return_long_s2
 
 c_return_total = last_return_total.cumsum()
+
+
+fig = plot.trades(residuals, std, trades, c_return_total*10)
+
 
 # ## Stats
 
