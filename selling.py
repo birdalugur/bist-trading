@@ -54,7 +54,8 @@ def signal_points(signal: pd.Series) -> [pd.Index, pd.Index]:
     entry_points = entry_exit_points[entry_exit_points == 1].index
     exit_points_points = entry_exit_points[entry_exit_points == -1].index
     if len(entry_points) > len(exit_points_points):
-        exit_points_points = exit_points_points.append(pd.DatetimeIndex([signal.index[-1]]))
+        entry_points = entry_points[0:len(exit_points_points)]
+        # exit_points_points = exit_points_points.append(pd.DatetimeIndex([signal.index[-1]]))
     return entry_points, exit_points_points
 
 

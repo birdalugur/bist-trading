@@ -1,18 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
-import numpy as np
 import pandas as pd
-from typing import Union
-from itertools import combinations
-import statsmodels.api as sm
-import random
-import plotly.express as px
-from importlib import reload
 
 import mydata
-import wavelets
 import residual
 import selling
 import rolling
