@@ -17,6 +17,7 @@ import residual
 import selling
 import rolling
 import plot
+from buysell import buy_sell_stats
 
 # ## Read data
 
@@ -64,9 +65,9 @@ all_signal = pd.Series([i or j for i, j in zip(signal_1, signal_2)], index=signa
 
 # Mark entry - exit points
 
-entry_points_s1, exit_points_1 = selling.signal_points(signal_1)
+entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
 
-entry_points_s2, exit_points_2 = selling.signal_points(signal_2)
+entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
 
 entry_points, exit_points = selling.signal_points(all_signal)
 
@@ -75,13 +76,13 @@ entry_exit = list(zip(entry_points, exit_points))
 # ## Calculation long / short selling
 
 
-return_short_s1 = -selling.calc_selling(pair[pair_name[0]], entry_points_s1, exit_points_1)
+return_short_s1 = -selling.calc_selling(pair[pair_name[0]], entry_points_s1, exit_points_s1)
 
-return_long_s1 = selling.calc_selling(pair[pair_name[1]], entry_points_s1, exit_points_1)
+return_long_s1 = selling.calc_selling(pair[pair_name[1]], entry_points_s1, exit_points_s1)
 
-return_short_s2 = selling.calc_selling(pair[pair_name[0]], entry_points_s2, exit_points_2)
+return_long_s2 = selling.calc_selling(pair[pair_name[0]], entry_points_s2, exit_points_s2)
 
-return_long_s2 = -selling.calc_selling(pair[pair_name[1]], entry_points_s2, exit_points_2)
+return_short_s2 = -selling.calc_selling(pair[pair_name[1]], entry_points_s2, exit_points_s2)
 
 return_s1 = return_short_s1 + return_long_s1
 
@@ -160,9 +161,21 @@ c_return_s2 = c_return_short_s2 + c_return_long_s2
 
 c_return_total = last_return_total.cumsum()
 
+s2 = buy_sell_stats(pair, name_long=pair_name[0], name_short=pair_name[1], entry_points=entry_points_s2,
+                    exit_points=exit_points_s2, signal_type='s2')
+s1 = buy_sell_stats(pair, name_long=pair_name[1], name_short=pair_name[0], entry_points=entry_points_s1,
+                    exit_points=exit_points_s1, signal_type='s1')
+
+s2['last_return'] = last_return_s2.values
+s1['last_return'] = last_return_s1.values
+
+s2['c_return'] = c_return_s2.values
+s1['c_return'] = c_return_s1.values
+
+buy_sell = pd.concat([s2, s1])
 
 plot.trades(residuals, std, trades, pair_name)
-plot.cumsum(c_return_total*10, pair_name, trades)
+plot.cumsum(c_return_total * 10, pair_name, trades)
 
 # ## Stats
 
@@ -182,8 +195,8 @@ median_total = last_return_total.median()
 # ### Average duration of trades
 
 
-duration_s1 = exit_points_1 - entry_points_s1[0:len(exit_points_1)]
-duration_s2 = exit_points_2 - entry_points_s2[0:len(exit_points_2)]
+duration_s1 = exit_points_s1 - entry_points_s1[0:len(exit_points_s1)]
+duration_s2 = exit_points_s2 - entry_points_s2[0:len(exit_points_s2)]
 avg_duration_s1 = duration_s1.seconds.to_series().mean()
 avg_duration_s2 = duration_s2.seconds.to_series().mean()
 
@@ -224,3 +237,5 @@ stats = pd.DataFrame([[c_return, c_return_per_trade, number_trades, duration_tra
                      )
 
 stats
+
+buy_sell

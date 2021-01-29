@@ -4,6 +4,7 @@
 import pandas as pd
 import mydata
 import get_stats
+import multiprocessing
 
 # ## Read data
 
@@ -18,27 +19,50 @@ data = mydata.mid_price(data, agg_time='5Min')
 
 # parameters
 
-pair_names = mydata.pair_names[0:5]
+pair_names = mydata.pair_names[0:8]
 window_size = 300
 threshold = 1
 intercept = False
 w_la8_1 = False
 
-all_results = []
+all_stats = []
+all_buy_sell = []
 
-for pair_name in pair_names:
+
+def run(pair_name):
     print(pair_name)
     pair = data.loc[:, pair_name]
     pair.dropna(inplace=True)
-    result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
-    all_results.append(result_std)
-    # try:
-    #     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
-    #     all_results.append(result_std)
-    # except:
-    #     print("hata")
+    stats, buy_sell = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+
+    return stats, buy_sell
 
 
-result = pd.concat(all_results)
+if __name__ == '__main__':
+    pool = multiprocessing.Pool(processes=8)
+    results = pool.map(run, pair_names)
 
-result.to_csv('rol300_noint_5min_thr2_s1la20.csv')
+    results = list(zip(*results))
+
+    df_stats = pd.concat(results[0])
+    df_buy_sell = pd.concat(results[1])
+
+    df_stats.to_csv('rol300_noint_5min_thr1_std.csv')
+    df_buy_sell.to_csv('bs_rol300_noint_5min_thr1_std.csv')
+
+# for pair_name in pair_names:
+#     print(pair_name)
+#     pair = data.loc[:, pair_name]
+#     pair.dropna(inplace=True)
+#     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+#     all_results.append(result_std)
+#     # try:
+#     #     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+#     #     all_results.append(result_std)
+#     # except:
+#     #     print("hata")
+
+
+# result = pd.concat(all_results)
+#
+# result.to_csv('rol300_noint_5min_thr2_s1la20.csv')
