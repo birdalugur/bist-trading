@@ -31,6 +31,8 @@ data = mydata.mid_price(data, agg_time='5Min')
 pair_name = mydata.pair_names[9]
 pair = data.loc[:, pair_name]
 
+pair.dropna(inplace=True)
+
 window_size = 100
 threshold = 1
 
@@ -159,8 +161,8 @@ c_return_s2 = c_return_short_s2 + c_return_long_s2
 c_return_total = last_return_total.cumsum()
 
 
-fig = plot.trades(residuals, std, trades, pair_name, c_return_total * 10)
-
+plot.trades(residuals, std, trades, pair_name)
+plot.cumsum(c_return_total*10, pair_name, trades)
 
 # ## Stats
 

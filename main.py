@@ -29,6 +29,7 @@ all_results = []
 for pair_name in pair_names:
     print(pair_name)
     pair = data.loc[:, pair_name]
+    pair.dropna(inplace=True)
     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
     all_results.append(result_std)
     # try:

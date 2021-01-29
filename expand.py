@@ -1,53 +1,56 @@
-from typing import Union
 import pandas as pd
 
 
-def find_frequency(times: pd.DatetimeIndex) -> pd.Timedelta:
-    """Verilen zaman serisinin frekansını döndürür."""
-    ts = pd.Series(times)
-    freq = ts.diff()[1]
-    return freq
+# td = pd.Timedelta(weeks=1)  # window değeri
+#
+# first_df = pair.first(td)   # ilk df
+#
+# current_date = first_df.index[-1].date()
+#
+# time_list = list(pair.index[~pair.index.isin(first_df.index)])
+#
+# first_index = first_df.index[0]
+#
+# expands = [first_df]
+#
+# while time_list:
+#     current_index = time_list.pop(0)
+#
+#     new_data = pair.loc[current_index]
+#
+#     if current_index.date() > current_date:
+#         current_date = current_index.date()
+#         first_index = current_index-td
+#         first_df = first_df[first_df.index >= first_index]
+#
+#     first_df = first_df.append(new_data)
+#
+#     expands.append(first_df)
 
 
-def get_window_period(times: pd.DatetimeIndex, window: Union[pd.Timedelta, int]) -> int:
-    """
-    Gün geçişlerinde, periodlardaki eksilmeyi önlemek için,
-    Zaman nesnesi olarak verilen window değerine karşılık gelen
-     int değerini döndürür.
-    """
+def expands(data, td=pd.Timedelta(weeks=1)):
+    first_df = data.first(td)
 
-    if type(window) == int:
-        return window
-    freq = find_frequency(times)
-    return int(window / freq)
+    current_date = first_df.index[-1].date()
 
+    time_list = list(data.index[~data.index.isin(first_df.index)])
 
-def windows(data, window: Union[int, pd.Timedelta]) -> list:
-    """Return moving windows"""
+    first_index = first_df.index[0]
 
-    window_value = get_window_period(data.index, window)
+    __expands = [first_df]
 
-    all_days = [day[1] for day in data.resample('D') if len(day[1]) != 0]
+    while time_list:
+        current_index = time_list.pop(0)
 
-    for i in range(len(all_days) - 1):
-        lastofday = all_days[i].tail(window_value - 1)
-        all_days[i + 1] = all_days[i + 1].append(lastofday).sort_index()
+        new_data = data.loc[current_index]
 
-    windows = []
+        if current_index.date() > current_date:
+            current_date = current_index.date()
+            first_index = current_index - td
+            first_df = first_df[first_df.index > first_index]
 
-    for day in all_days:
-        day_window = list(day.expanding(window_value))
-        windows.extend(day_window)
+        first_df = first_df.append(new_data)
 
-    return windows[window_value-1:]
+        __expands.append(first_df)
 
-
-def std(values, window_size):
-    std_window = windows(values, window_size)
-    idx = map(lambda x: x.index[-1], std_window)
-    std_values = map(lambda x: x.std(), std_window)
-
-    return pd.Series(std_values, index=idx, name='std')
-
-
-
+    return __expands
