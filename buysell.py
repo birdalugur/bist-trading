@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 # name_long = pair_name[0]
 # name_short = pair_name[1]
 #
@@ -9,7 +11,6 @@ import pandas as pd
 
 
 def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signal_type):
-
     df_entry = pair.loc[entry_points]
     df_exit = pair.loc[exit_points]
 
@@ -20,7 +21,6 @@ def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signa
         df_entry.columns = ['entry_price_2', 'entry_price_1']
         df_exit.columns = ['exit_price_2', 'exit_price_1']
 
-
     df_entry['entry_symbol_1'] = name_long
     df_entry['entry_symbol_2'] = name_short
 
@@ -28,7 +28,6 @@ def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signa
     df_entry['entry_side_2'] = 'S'
 
     df_entry.index.name = 'entry_time'
-
 
     df_exit['exit_symbol_1'] = name_long
     df_exit['exit_symbol_2'] = name_short
@@ -43,7 +42,6 @@ def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signa
     ], axis=1)
 
     df['signal_type'] = signal_type
-
 
     cols = ['entry_symbol_1', 'entry_time', 'entry_price_1', 'entry_side_1',
             'entry_symbol_2', 'entry_price_2', 'entry_side_2',
