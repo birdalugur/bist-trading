@@ -18,11 +18,19 @@ data['c_short'] = c_short
 data['c_return'] = c_returns
 data['return'] = returns
 
+last_c_return = data.set_index(['entry_symbol_1', 'entry_symbol_2']).groupby(level=[0,1])['c_return'].tail(1)
+number_of_trades = data.groupby(['entry_symbol_1', 'entry_symbol_2']).size()
+
+c_return_per_trade = last_c_return/number_of_trades
+c_return_per_trade.name = 'c_return_per_trade'
+data = data.merge(c_return_per_trade, left_on=['entry_symbol_1', 'entry_symbol_2'],right_index=True)
+
+
 data.drop('Unnamed: 0', inplace=True, axis=1)
 
 data['duration'] = data['exit_time'] - data['entry_time']
 
-data = data[['long', 'short', 'c_long', 'c_short', 'return', 'duration', 'last_return', 'c_return']]
+data = data[['long', 'short', 'c_long', 'c_short', 'return', 'duration', 'last_return', 'c_return','c_return_per_trade']]
 
 data = data.sort_values('c_return', ascending=False)
 
@@ -36,6 +44,10 @@ avg_20 = data.head(20).mean()
 
 result = pd.DataFrame([average, avg_positive, avg_20, num_positive],
                       index=['avg', 'positive', 'avg_20', 'return_positive'])
+
+
+
+
 
 # duration_trades_median = data.groupby(['entry_symbol_1', 'entry_symbol_2']).apply(
 #     lambda x: x['duration'].median())
