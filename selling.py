@@ -75,7 +75,8 @@ def selling_series(data):
     _entry = data.iloc[_in]
     for _out in range(1, len(data)):
         _exit_points = data.iloc[_out]
-        res = (_exit_points - _entry) / _entry
+        # res = (_exit_points - _entry) / _entry
+        res = (_exit_points - _entry) * 100
         result.append(res)
     result.insert(0, np.nan)
     result = pd.Series(result, index=idx)

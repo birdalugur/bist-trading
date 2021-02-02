@@ -1,15 +1,6 @@
 import pandas as pd
 
 
-# name_long = pair_name[0]
-# name_short = pair_name[1]
-#
-# signal_type = 's2'
-#
-# entry_points = entry_points_s2
-# exit_points = exit_points_s2
-
-
 def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signal_type):
     df_entry = pair.loc[entry_points]
     df_exit = pair.loc[exit_points]
@@ -52,3 +43,23 @@ def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signa
     df = df[cols]
 
     return df
+
+
+
+
+
+s2 = buy_sell_stats(pair, name_long=pair_name[0], name_short=pair_name[1], entry_points=entry_points_s2,
+                    exit_points=exit_points_s2, signal_type='s2')
+s1 = buy_sell_stats(pair, name_long=pair_name[1], name_short=pair_name[0], entry_points=entry_points_s1,
+                    exit_points=exit_points_s1, signal_type='s1')
+
+s2['last_return'] = last_return_s2.values
+s1['last_return'] = last_return_s1.values
+
+s2['c_return'] = c_return_s2.values
+s1['c_return'] = c_return_s1.values
+
+buy_sell = pd.concat([s2, s1])
+
+plot.trades(residuals, std, trades, pair_name)
+plot.cumsum(c_return_total * 10, pair_name, trades)

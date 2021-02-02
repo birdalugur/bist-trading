@@ -25,7 +25,7 @@ pair = data.loc[:, pair_name]
 
 pair.dropna(inplace=True)
 
-window_size = 100
+window_size = 300
 threshold = 1
 
 stats_type = 'standart'
@@ -52,7 +52,7 @@ std = std.dropna().reindex(pair.index) * threshold
 
 signal_1, signal_2 = selling.get_signal(residuals, std)
 
-all_signal = pd.Series([i or j for i, j in zip(signal_1, signal_2)], index=signal_1.index)
+# all_signal = pd.Series([i or j for i, j in zip(signal_1, signal_2)], index=signal_1.index)
 
 # Mark entry - exit points
 
@@ -60,9 +60,9 @@ entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
 
 entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
 
-entry_points, exit_points = selling.signal_points(all_signal)
+# entry_points, exit_points = selling.signal_points(all_signal)
 
-entry_exit = list(zip(entry_points, exit_points))
+# entry_exit = list(zip(entry_points, exit_points))
 
 # ## Calculation long / short selling
 
@@ -74,6 +74,9 @@ return_long_s1 = selling.calc_selling(pair[pair_name[1]], entry_points_s1, exit_
 return_long_s2 = selling.calc_selling(pair[pair_name[0]], entry_points_s2, exit_points_s2)
 
 return_short_s2 = -selling.calc_selling(pair[pair_name[1]], entry_points_s2, exit_points_s2)
+
+
+
 
 return_s1 = return_short_s1 + return_long_s1
 
@@ -116,17 +119,16 @@ last_return_long_s2 = last_of_trade(return_long_s2)
 # ### Number of trades
 
 
-# trade bitimi-time series
-get_number = lambda x: x['time'].reset_index().set_index('time')['number']
-
-lastnumber_return_1 = get_number(last_return_short_s1)
-lastnumber_return_2 = get_number(last_return_short_s2)
-
-number_return_1 = get_trade_number(return_long_s1)
-number_return_2 = get_trade_number(return_long_s2)
+# # trade bitimi-time series
+# get_number = lambda x: x['time'].reset_index().set_index('time')['number']
+#
+# lastnumber_return_1 = get_number(last_return_short_s1)
+# lastnumber_return_2 = get_number(last_return_short_s2)
+#
+# number_return_1 = get_trade_number(return_long_s1)
+# number_return_2 = get_trade_number(return_long_s2)
 
 # ### Last of trades
-
 
 last_return_short_s1 = last_return_short_s1.set_index('time').iloc[:, -1].rename('last_return_short_s1')
 last_return_long_s1 = last_return_long_s1.set_index('time').iloc[:, -1].rename('last_return_long_s1')

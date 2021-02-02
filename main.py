@@ -19,7 +19,7 @@ data = mydata.mid_price(data, agg_time='5Min')
 
 # parameters
 
-pair_names = mydata.pair_names[0:8]
+pair_names = mydata.pair_names
 window_size = 300
 threshold = 1
 intercept = False
