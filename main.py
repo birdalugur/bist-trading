@@ -19,10 +19,11 @@ data = pd.read_csv(folder_path, parse_dates=['time'], index_col=['time'])
 # parameters
 
 pair_names = mydata.pair_names
+data_freq = '5Min'
 window_size = 300
 threshold = 1
 intercept = False
-w_la8_1 = False
+wavelet = False
 
 all_stats = []
 all_buy_sell = []
@@ -32,9 +33,9 @@ def run(pair_name):
     print(pair_name)
     pair = data.loc[:, pair_name]
     pair.dropna(inplace=True)
-    stats_rate = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, 'rate')
-    stats_100 = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, '100')
-    trade_table = trading_table(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+    stats_rate = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, wavelet, 'rate')
+    stats_100 = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, wavelet, '100')
+    trade_table = trading_table(pair, window_size, pair_name, threshold, intercept, wavelet)
 
     return stats_rate, stats_100, trade_table
 
@@ -51,7 +52,11 @@ if __name__ == '__main__':
 
     df_trade_table = pd.concat(results[2])
 
-    file_name = 'rol300_noint_5min_thr1_std'
+    file_name = 'roll_' + str(window_size) + \
+                '_freq_' + data_freq + \
+                '_thr_' + str(threshold) + \
+                '_int_' + str(intercept) + \
+                '_wavelets_' + str(wavelet)
 
     df_stats_rate.to_csv(file_name + '_rate' + '.csv')
     df_stats_100.to_csv(file_name + '_100' + '.csv')
