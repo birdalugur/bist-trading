@@ -33,9 +33,9 @@ def run(pair_name):
     print(pair_name)
     pair = data.loc[:, pair_name]
     pair.dropna(inplace=True)
-    stats, buy_sell = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+    stats = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
 
-    return stats, buy_sell
+    return stats
 
 
 if __name__ == '__main__':
@@ -45,7 +45,5 @@ if __name__ == '__main__':
     results = list(zip(*results))
 
     df_stats = pd.concat(results[0])
-    df_buy_sell = pd.concat(results[1])
 
     df_stats.to_csv('rol300_noint_5min_thr1_std.csv')
-    df_buy_sell.to_csv('bs_rol300_noint_5min_thr1_std.csv')
