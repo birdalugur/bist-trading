@@ -8,11 +8,6 @@ import residual
 import selling
 import rolling
 
-# Read data & calc mp >>>>>>>>>>>>>>>>>>>>>>
-folder_path = '/home/ugur/bistlmts/data/BIST_Eylul/'
-data = mydata.read(folder_path)
-data = mydata.mid_price(data, agg_time='5Min')
-# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 data = pd.read_csv('data.csv', parse_dates=['time'], index_col=['time'])
 
