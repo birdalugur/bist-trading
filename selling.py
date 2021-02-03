@@ -75,7 +75,20 @@ def selling_series(data):
     _entry = data.iloc[_in]
     for _out in range(1, len(data)):
         _exit_points = data.iloc[_out]
-        # res = (_exit_points - _entry) / _entry
+        res = (_exit_points - _entry) / _entry
+        result.append(res)
+    result.insert(0, np.nan)
+    result = pd.Series(result, index=idx)
+    return result
+
+
+def selling_series_100(data):
+    idx = data.index
+    result = []
+    _in = 0
+    _entry = data.iloc[_in]
+    for _out in range(1, len(data)):
+        _exit_points = data.iloc[_out]
         res = (_exit_points - _entry) * 100
         result.append(res)
     result.insert(0, np.nan)
@@ -93,9 +106,15 @@ def time_slice(data, entry, exit_points):
     return slices
 
 
-def calc_selling(data, entry, exit_points):
+def calc_selling(data, entry, exit_points, type):
     all_selling = []
     slices = time_slice(data, entry, exit_points)
-    for _slice in slices:
-        all_selling.append(selling_series(_slice))
+    if type == 'rate':
+        for _slice in slices:
+            all_selling.append(selling_series(_slice))
+    elif type == '100':
+        for _slice in slices:
+            all_selling.append(selling_series_100(_slice))
+    else:
+        raise ValueError
     return pd.concat(all_selling)

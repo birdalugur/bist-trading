@@ -41,25 +41,3 @@ def cumsum(cumsum, name, trades=None):
             fig.add_trace(sctr)
 
     plot(fig, auto_open=False, filename='cumsum/' + '_'.join(name)+'.html')
-
-
-
-#
-# import plotly.graph_objects as go
-#
-#
-# fig = go.Figure(data=[go.Bar(
-#     x=x.index,
-#     y=x.values,
-#     width=[0.8, 0.8, 0.8, 3.5, 4] # customize width here
-# )])
-#
-# fig.show()
-#
-#
-# fig.add_trace(go.Bar(
-#     x=x.index,
-#     y=x.values,
-#     marker_color='black'
-#     # customize width here
-# ))

@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import multiprocessing
 import pandas as pd
 import mydata
 import get_stats
-import multiprocessing
+from trading_table import trading_table
 
-# ## Read data
+folder_path = 'data.csv'
 
-folder_path = '/home/ugur/bistlmts/data/BIST_Eylul/'
+# data = mydata.read(folder_path)
 
-data = mydata.read(folder_path)
-
-# data = pd.read_csv(folder_path)
+data = pd.read_csv(folder_path, parse_dates=['time'], index_col=['time'])
 # data['time'] = pd.to_datetime(data.time)
 
-data = mydata.mid_price(data, agg_time='5Min')
+# data = mydata.mid_price(data, agg_time='5Min')
 
 # parameters
 
@@ -33,9 +32,11 @@ def run(pair_name):
     print(pair_name)
     pair = data.loc[:, pair_name]
     pair.dropna(inplace=True)
-    stats = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
+    stats_rate = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, 'rate')
+    stats_100 = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, '100')
+    trade_table = trading_table(pair, window_size, pair_name, threshold, intercept, w_la8_1)
 
-    return stats
+    return stats_rate, stats_100, trade_table
 
 
 if __name__ == '__main__':
@@ -44,6 +45,14 @@ if __name__ == '__main__':
 
     results = list(zip(*results))
 
-    df_stats = pd.concat(results[0])
+    df_stats_rate = pd.concat(results[0])
 
-    df_stats.to_csv('rol300_noint_5min_thr1_std.csv')
+    df_stats_100 = pd.concat(results[1])
+
+    df_trade_table = pd.concat(results[2])
+
+    file_name = 'rol300_noint_5min_thr1_std'
+
+    df_stats_rate.to_csv(file_name + '_rate' + '.csv')
+    df_stats_100.to_csv(file_name + '_100' + '.csv')
+    df_trade_table.to_csv(file_name + '_tradeTable' + '.csv')

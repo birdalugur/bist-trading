@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Union
 from itertools import combinations
-import statsmodels.api as sm
 import random
-import plotly.express as px
 from importlib import reload
 
 import mydata
@@ -12,12 +10,9 @@ import wavelets
 import residual
 import selling
 import rolling
-import plot
-from buysell import buy_sell_stats
 
 
-def get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1):
-    # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
+def get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, selling_type):
     all_windows = rolling.windows(pair, window_size)
     residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
     std = [resid.std() for resid in residuals]
@@ -42,11 +37,11 @@ def get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1):
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Calculation long / short selling (All Returns) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    return_short_s1 = -selling.calc_selling(pair[pair_name[0]], entry_points_s1, exit_points_s1)
-    return_long_s1 = selling.calc_selling(pair[pair_name[1]], entry_points_s1, exit_points_s1)
+    return_short_s1 = -selling.calc_selling(pair[pair_name[0]], entry_points_s1, exit_points_s1, selling_type)
+    return_long_s1 = selling.calc_selling(pair[pair_name[1]], entry_points_s1, exit_points_s1, selling_type)
 
-    return_short_s2 = -selling.calc_selling(pair[pair_name[1]], entry_points_s2, exit_points_s2)
-    return_long_s2 = selling.calc_selling(pair[pair_name[0]], entry_points_s2, exit_points_s2)
+    return_short_s2 = -selling.calc_selling(pair[pair_name[1]], entry_points_s2, exit_points_s2, selling_type)
+    return_long_s2 = selling.calc_selling(pair[pair_name[0]], entry_points_s2, exit_points_s2, selling_type)
 
     total_return_s1 = return_short_s1 + return_long_s1
     total_return_s2 = return_short_s2 + return_long_s2
