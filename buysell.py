@@ -1,5 +1,53 @@
 import pandas as pd
 
+import mydata
+import residual
+import selling
+import rolling
+
+
+data = pd.read_csv('data.csv', parse_dates=['time'], index_col=['time'])
+
+
+# Options >>>>>>>>>>>>>>>>>>>>>>>>
+window_size = 300
+threshold = 1
+stats_type = 'standart'
+intercept = False
+w_la8_1 = False
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+# Select a pair >>>>>>>>>>>>>>>>>>>
+pair_name = mydata.pair_names[1]
+pair = data.loc[:, pair_name]
+pair.dropna(inplace=True)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+# calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
+all_windows = rolling.windows(pair, window_size)
+residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
+std = [resid.std() for resid in residuals]
+residuals = pd.concat(map(lambda r: r.tail(1), residuals))  # get last values
+std = pd.Series(std, index=residuals.index)
+residuals = residuals.dropna().reindex(pair.index)
+std = std.dropna().reindex(pair.index) * threshold
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+# Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+signal_1, signal_2 = selling.get_signal(residuals, std)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+# Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
+entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
+entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 
 def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signal_type):
     df_entry = pair.loc[entry_points]
