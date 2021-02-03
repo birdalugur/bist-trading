@@ -5,9 +5,7 @@ import residual
 import selling
 import rolling
 
-
 data = pd.read_csv('data.csv', parse_dates=['time'], index_col=['time'])
-
 
 # Options >>>>>>>>>>>>>>>>>>>>>>>>
 window_size = 300
@@ -18,13 +16,11 @@ w_la8_1 = False
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-
 # Select a pair >>>>>>>>>>>>>>>>>>>
 pair_name = mydata.pair_names[1]
 pair = data.loc[:, pair_name]
 pair.dropna(inplace=True)
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 
 # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -47,6 +43,7 @@ signal_1, signal_2 = selling.get_signal(residuals, std)
 entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
 entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 
 
 def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signal_type):
@@ -94,20 +91,16 @@ def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signa
 
 
 
+s1 = buy_sell_stats(pair, name_long=pair_name[1], name_short=pair_name[0], entry_points=entry_points_s1,
+                    exit_points=exit_points_s1, signal_type='s1')
+
 
 
 s2 = buy_sell_stats(pair, name_long=pair_name[0], name_short=pair_name[1], entry_points=entry_points_s2,
                     exit_points=exit_points_s2, signal_type='s2')
-s1 = buy_sell_stats(pair, name_long=pair_name[1], name_short=pair_name[0], entry_points=entry_points_s1,
-                    exit_points=exit_points_s1, signal_type='s1')
 
-s2['last_return'] = last_return_s2.values
-s1['last_return'] = last_return_s1.values
-
-s2['c_return'] = c_return_s2.values
-s1['c_return'] = c_return_s1.values
 
 buy_sell = pd.concat([s2, s1])
 
-plot.trades(residuals, std, trades, pair_name)
-plot.cumsum(c_return_total * 10, pair_name, trades)
+
+buy_sell.to_csv('bs_'+'_'.join(pair_name)+'.csv', index=False)
