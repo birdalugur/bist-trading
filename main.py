@@ -49,20 +49,3 @@ if __name__ == '__main__':
 
     df_stats.to_csv('rol300_noint_5min_thr1_std.csv')
     df_buy_sell.to_csv('bs_rol300_noint_5min_thr1_std.csv')
-
-# for pair_name in pair_names:
-#     print(pair_name)
-#     pair = data.loc[:, pair_name]
-#     pair.dropna(inplace=True)
-#     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
-#     all_results.append(result_std)
-#     # try:
-#     #     result_std = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1)
-#     #     all_results.append(result_std)
-#     # except:
-#     #     print("hata")
-
-
-# result = pd.concat(all_results)
-#
-# result.to_csv('rol300_noint_5min_thr2_s1la20.csv')
