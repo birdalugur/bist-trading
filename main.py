@@ -33,11 +33,9 @@ def run(pair_name):
     print(pair_name)
     pair = data.loc[:, pair_name]
     pair.dropna(inplace=True)
-    stats_rate = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, wavelet, 'rate')
-    stats_100 = get_stats.get_stats(pair, window_size, pair_name, threshold, intercept, wavelet, '100')
     trade_table = trading_table(pair, window_size, pair_name, threshold, intercept, wavelet)
 
-    return stats_rate, stats_100, trade_table
+    return trade_table
 
 
 if __name__ == '__main__':
@@ -46,9 +44,6 @@ if __name__ == '__main__':
 
     results = list(zip(*results))
 
-    df_stats_rate = pd.concat(results[0])
-
-    df_stats_100 = pd.concat(results[1])
 
     df_trade_table = pd.concat(results[2])
 
@@ -58,6 +53,4 @@ if __name__ == '__main__':
                 '_int_' + str(intercept) + \
                 '_wavelets_' + str(wavelet)
 
-    df_stats_rate.to_csv(file_name + '_rate' + '.csv')
-    df_stats_100.to_csv(file_name + '_100' + '.csv')
     df_trade_table.to_csv(file_name + '_tradeTable' + '.csv')

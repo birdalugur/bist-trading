@@ -1,6 +1,12 @@
 import pandas as pd
 
 
+pair = data.loc[:, pair_names]
+
+
+rolls = list(pair.rolling('D'))
+
+
 def expands(data, td=pd.Timedelta(weeks=1)):
     first_df = data.first(td)
 
@@ -27,3 +33,4 @@ def expands(data, td=pd.Timedelta(weeks=1)):
         __expands.append(first_df)
 
     return __expands
+
