@@ -7,14 +7,19 @@ import mydata
 import get_stats
 from trading_table import trading_table
 
-folder_path = 'data.csv'
 
-# data = mydata.read(folder_path)
+folder_path = '201911.csv'
+use_cols = ['symbol', 'time', 'bid_price', 'ask_price']
 
-data = pd.read_csv(folder_path, parse_dates=['time'], index_col=['time'])
-# data['time'] = pd.to_datetime(data.time)
+data = pd.read_csv(folder_path, usecols=use_cols, converters={'time': lambda x: pd.Timestamp(int(x))})
 
-# data = mydata.mid_price(data, agg_time='5Min')
+data = data[data.symbol.isin(mydata.BIST30)]
+
+bid_price = data.pivot_table(index='time', columns='symbol', values='bid_price')
+
+ask_price = data.pivot_table(index='time', columns='symbol', values='ask_price')
+
+mid_price = mydata.mid_price(data, agg_time='5Min')
 
 # parameters
 
@@ -31,9 +36,11 @@ all_buy_sell = []
 
 def run(pair_name):
     print(pair_name)
-    pair = data.loc[:, pair_name]
-    pair.dropna(inplace=True)
-    trade_table = trading_table(pair, window_size, pair_name, threshold, intercept, wavelet)
+    pair_mid = mid_price.loc[:, pair_name]
+    pair_ask = ask_price.loc[:, pair_name]
+    pair_bid = bid_price.loc[:, pair_name]
+    pair_mid.dropna(inplace=True)
+    trade_table = trading_table(pair_mid, window_size, pair_name, threshold, intercept, wavelet)
 
     return trade_table
 

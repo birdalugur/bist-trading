@@ -12,9 +12,9 @@ import selling
 import rolling
 
 
-def get_stats(pair, window_size, pair_name, threshold, intercept, w_la8_1, selling_type):
+def get_stats(pair, window_size, pair_name, threshold, intercept, wavelet, selling_type):
     all_windows = rolling.windows(pair, window_size)
-    residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
+    residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
     std = [resid.std() for resid in residuals]
     residuals = pd.concat(map(lambda r: r.tail(1), residuals))  # get last values
     std = pd.Series(std, index=residuals.index)

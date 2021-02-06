@@ -6,86 +6,93 @@ import selling
 import rolling
 
 
-def trading_table(pair, window_size, pair_name, threshold, intercept, w_la8_1):
+def get_first_prices(ts, points):
+    """Verilen zamana ait ilk işlemi döndürür. İşlem yoksa NaN kabul edilir."""
 
+    new_ts = pd.Series()
+    ts = ts.dropna()
+
+    for point in points:
+        x = ts[str(point)]
+
+        if len(x) == 0:
+            be_added = pd.Series(data=None, index=[point])
+        else:
+            be_added = x.head(1)
+        new_ts = new_ts.append(be_added)
+    new_ts.name = ts.name
+
+    return new_ts
+
+
+def trading_table(pair_mid, window_size, pair_name, threshold, intercept, wavelet):
     # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
-    all_windows = rolling.windows(pair, window_size)
-    residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, w_la8_1=w_la8_1), all_windows))
+    all_windows = rolling.windows(pair_mid, window_size)
+    residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
     std = [resid.std() for resid in residuals]
     residuals = pd.concat(map(lambda r: r.tail(1), residuals))  # get last values
     std = pd.Series(std, index=residuals.index)
-    residuals = residuals.dropna().reindex(pair.index)
-    std = std.dropna().reindex(pair.index) * threshold
+    residuals = residuals.dropna().reindex(pair_mid.index)
+    std = std.dropna().reindex(pair_mid.index) * threshold
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
     # Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     signal_1, signal_2 = selling.get_signal(residuals, std)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
     # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
     entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
     entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+    # Signal 1'den gelen pointslerden pair_0 short yani -> Sell
+    # Signal 1'den gelen pointslerden pair_1 long yani -> Buy
 
+    # Signal 2'den gelen pointslerden pair_0 long yani -> Buy
+    # Signal 2'den gelen pointslerden pair_1 short yani -> Sell
 
-    def buy_sell_stats(pair, name_long, name_short, entry_points, exit_points, signal_type):
-        df_entry = pair.loc[entry_points]
-        df_exit = pair.loc[exit_points]
+    # S'ler price 2 ' ye
+    # B'ler price 1 ' e
 
-        if signal_type == 's2':
-            df_entry.columns = ['entry_price_1', 'entry_price_2']
-            df_exit.columns = ['exit_price_1', 'exit_price_2']
-        if signal_type == 's1':
-            df_entry.columns = ['entry_price_2', 'entry_price_1']
-            df_exit.columns = ['exit_price_2', 'exit_price_1']
+    # ask price -> alım fiyatı
+    # bid price -> satış fiyatı
 
-        df_entry['entry_symbol_1'] = name_long
-        df_entry['entry_symbol_2'] = name_short
+    entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1)
+    entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2)
 
-        df_entry['entry_side_1'] = 'B'
-        df_entry['entry_side_2'] = 'S'
+    exit_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], exit_points_s1)
+    exit_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], exit_points_s2)
 
-        df_entry.index.name = 'entry_time'
+    entry_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], entry_points_s1)
+    entry_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], entry_points_s2)
 
-        df_exit['exit_symbol_1'] = name_long
-        df_exit['exit_symbol_2'] = name_short
-        df_exit['exit_side_1'] = 'B'
-        df_exit['exit_side_2'] = 'S'
+    exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1)
+    exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
 
-        df_exit.index.name = 'exit_time'
+    # s1 den aldığımız ve s2 den aldığımız
+    buy1_entry = pd.DataFrame({'entry_price_1': entry_price_buy_1, 'entry_symbol_1': entry_price_buy_1.name})
+    buy2_entry = pd.DataFrame({'entry_price_1': entry_price_buy_2, 'entry_symbol_1': entry_price_buy_2.name})
 
-        df = pd.concat([
-            df_entry.reset_index(),
-            df_exit.reset_index()
-        ], axis=1)
+    sell1_entry = pd.DataFrame({'entry_price_2': entry_price_sell_1, 'entry_symbol_2': entry_price_sell_1.name})
+    sell2_entry = pd.DataFrame({'entry_price_2': entry_price_sell_2, 'entry_symbol_2': entry_price_sell_2.name})
 
-        df['signal_type'] = signal_type
+    buy1_exit = pd.DataFrame({'exit_price_1': exit_price_buy_1, 'exit_symbol_1': exit_price_buy_1.name})
+    buy2_exit = pd.DataFrame({'exit_price_1': exit_price_buy_2, 'exit_symbol_1': exit_price_buy_2.name})
 
-        cols = ['entry_symbol_1', 'entry_time', 'entry_price_1', 'entry_side_1',
-                'entry_symbol_2', 'entry_price_2', 'entry_side_2',
-                'exit_symbol_1', 'exit_time', 'exit_price_1', 'exit_side_1',
-                'exit_symbol_2', 'exit_price_2', 'exit_side_2', 'signal_type'
-                ]
+    sell1_exit = pd.DataFrame({'exit_price_2': exit_price_sell_1, 'exit_symbol_2': exit_price_sell_1.name})
+    sell2_exit = pd.DataFrame({'exit_price_2': exit_price_sell_2, 'exit_symbol_2': exit_price_sell_2.name})
 
-        df = df[cols]
+    buy_entry = buy1_entry.append(buy2_entry).assign(entry_side_1='B')
+    sell_entry = sell1_entry.append(sell2_entry).assign(entry_side_2='S')
+    buy_exit = buy1_exit.append(buy2_exit).assign(exit_side_1='B')
+    sell_exit = sell1_exit.append(sell2_exit).assign(exit_side_2='S')
 
-        return df
+    entry = buy_entry.merge(sell_entry, left_index=True, right_index=True, how='outer')
+    entry.index.name = 'entry time'
 
+    exit = buy_exit.merge(sell_exit, left_index=True, right_index=True, how='outer')
+    exit.index.name = 'exit time'
 
+    result = pd.concat([entry.reset_index(), exit.reset_index()], axis=1)
 
-    s1 = buy_sell_stats(pair, name_long=pair_name[1], name_short=pair_name[0], entry_points=entry_points_s1,
-                        exit_points=exit_points_s1, signal_type='s1')
-
-
-
-    s2 = buy_sell_stats(pair, name_long=pair_name[0], name_short=pair_name[1], entry_points=entry_points_s2,
-                        exit_points=exit_points_s2, signal_type='s2')
-
-
-    buy_sell = pd.concat([s2, s1])
-
-
-    return buy_sell
+    return result

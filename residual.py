@@ -18,7 +18,7 @@ def residuals(first, second, intercept=False):
     return resid
 
 
-def get_resid(pair, intercept=False, w_la8_1=False):
+def get_resid(pair, intercept=False, wavelet=False):
     first = pair.iloc[:, 0]
     second = pair.iloc[:, 1]
 
@@ -26,7 +26,7 @@ def get_resid(pair, intercept=False, w_la8_1=False):
 
     name = '_'.join((first.name, second.name))
 
-    if w_la8_1:
+    if wavelet:
         first = mra_s1(first)
         second = mra_s1(second)
 
