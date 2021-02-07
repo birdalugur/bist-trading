@@ -21,6 +21,13 @@ ask_price = data.pivot_table(index='time', columns='symbol', values='ask_price')
 
 mid_price = mydata.mid_price(data, agg_time='5Min')
 
+
+ask_price = ask_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill()))
+bid_price = bid_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill()))
+
+ask_price = ask_price.droplevel(0)
+bid_price = bid_price.droplevel(0)
+
 # parameters
 
 pair_names = mydata.pair_names
