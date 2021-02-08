@@ -89,13 +89,13 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, pair_name, threshol
     buy_exit = buy1_exit.append(buy2_exit).assign(exit_side_1='B')
     sell_exit = sell1_exit.append(sell2_exit).assign(exit_side_2='S')
 
-    entry = buy_entry.merge(sell_entry, left_index=True, right_index=True, how='outer')
-    entry.index.name = 'entry time'
+    entry_data = buy_entry.merge(sell_entry, left_index=True, right_index=True, how='outer')
+    entry_data.index.name = 'entry time'
 
-    exit = buy_exit.merge(sell_exit, left_index=True, right_index=True, how='outer')
-    exit.index.name = 'exit time'
+    exit_data = buy_exit.merge(sell_exit, left_index=True, right_index=True, how='outer')
+    exit_data.index.name = 'exit time'
 
-    result = pd.concat([entry.reset_index(), exit.reset_index()], axis=1)
-    result.to_csv('asd5.csv')
+    result = pd.concat([entry_data.reset_index(), exit_data.reset_index()], axis=1)
 
     return result
+

@@ -96,4 +96,5 @@ def time_range(ask_price, bid_price):
         end_time = last_bid
 
     tr = pd.date_range(first_time, end_time, freq='s')
+    tr = pd.DatetimeIndex(tr.to_series().astype('datetime64[s]'))
     return tr
