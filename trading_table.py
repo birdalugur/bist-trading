@@ -13,7 +13,9 @@ def get_first_prices(ts, points):
     ts = ts.dropna()
 
     for point in points:
-        x = ts[str(point)]
+        # t = point.strftime('%Y-%m-%d %H:%M')
+        t = str(point)
+        x = ts[t]
 
         if len(x) == 0:
             be_added = pd.Series(data=None, index=[point])
@@ -25,7 +27,7 @@ def get_first_prices(ts, points):
     return new_ts
 
 
-def trading_table(pair_mid, window_size, pair_name, threshold, intercept, wavelet):
+def trading_table(pair_mid, pair_ask, pair_bid, window_size, pair_name, threshold, intercept, wavelet):
     # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
     all_windows = rolling.windows(pair_mid, window_size)
     residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
@@ -69,7 +71,7 @@ def trading_table(pair_mid, window_size, pair_name, threshold, intercept, wavele
     exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1)
     exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
 
-    # s1 den aldığımız ve s2 den aldığımız
+
     buy1_entry = pd.DataFrame({'entry_price_1': entry_price_buy_1, 'entry_symbol_1': entry_price_buy_1.name})
     buy2_entry = pd.DataFrame({'entry_price_1': entry_price_buy_2, 'entry_symbol_1': entry_price_buy_2.name})
 
@@ -94,5 +96,6 @@ def trading_table(pair_mid, window_size, pair_name, threshold, intercept, wavele
     exit.index.name = 'exit time'
 
     result = pd.concat([entry.reset_index(), exit.reset_index()], axis=1)
+    result.to_csv('asd5.csv')
 
     return result

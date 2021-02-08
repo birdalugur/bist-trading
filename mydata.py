@@ -1,10 +1,9 @@
+from itertools import combinations
+from os import listdir
+import glob
+
 import numpy as np
 import pandas as pd
-from typing import Union
-from itertools import combinations
-import statsmodels.api as sm
-import random
-import plotly.express as px
 
 BIST30 = ["ARCLK", "ASELS", "BIMAS", "DOHOL", "EKGYO", "FROTO", "HALKB", "GARAN", "ISCTR", "KCHOL", "KOZAA", "KOZAL",
           "KRDMD", "AKBNK", "PETKM", "PGSUS", "SAHOL", "EREGL", "SODA", "TAVHL", "TCELL", "THYAO", "TKFEN",
@@ -12,6 +11,11 @@ BIST30 = ["ARCLK", "ASELS", "BIMAS", "DOHOL", "EKGYO", "FROTO", "HALKB", "GARAN"
 # SISE
 
 pair_names = list(combinations(BIST30, 2))
+
+
+use_cols = ['symbol', 'time', 'bid_price', 'ask_price']
+
+date_columns = 'time'
 
 
 def is_bist30(x: str) -> bool:
@@ -24,6 +28,31 @@ def is_bist30(x: str) -> bool:
     return False
 
 
+def get_file_paths(path: str) -> list:
+    _path = path + '*.csv'
+    """
+    Args:
+        path: verinin okunacağı dizine ait path.
+
+    Returns:
+        Dizinde bulunan tüm dosyaların listesi.
+        """
+    return glob.glob(_path)
+
+
+def read_multiple_data(all_paths: str) -> pd.DataFrame:
+    all_data = []
+    for _path in all_paths:
+        try:
+            all_data.append(
+                pd.read_csv(_path, usecols=use_cols,
+                            converters={date_columns: lambda x: pd.Timestamp(int(x))})
+            )
+        except pd.errors.EmptyDataError:
+            print("Empty Data:\n", _path)
+    return pd.concat(all_data)
+
+
 def read(path: str, datecol: str = 'time', dt=None) -> pd.DataFrame:
     """
     Bir klasörden csv verilerini okuyun.
@@ -32,7 +61,6 @@ def read(path: str, datecol: str = 'time', dt=None) -> pd.DataFrame:
         path : Klasöre ait yol
         datecol : Datetime column. default 'time'.
     """
-    from os import listdir
 
     all_paths = map(lambda x: path + x, listdir(path))
     all_data = []
@@ -50,25 +78,22 @@ def read(path: str, datecol: str = 'time', dt=None) -> pd.DataFrame:
     return pd.concat(all_data)
 
 
-def mid_price(data: pd.DataFrame, agg_time: str = '1Min') -> pd.DataFrame:
-    """
-    Calculate mid price.
 
-    Args:
-        index: 'time'
-        columns: 'symbol'
-        values: 'mid_price'
-        aggfunc: 'mean'
-    """
-    data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
+def time_range(ask_price, bid_price):
+    first_ask = ask_price.index[0]
+    last_ask = ask_price.index[-1]
+    first_bid = bid_price.index[1]
+    last_bid = bid_price.index[-1]
 
-    # Create a pivot table using mid price, symbol and time, if two
-    mid_price = data.pivot_table(index='time', columns='symbol', values='mid_price', aggfunc='mean')
+    if (first_ask < first_bid):
+        first_time = first_ask
+    else:
+        first_time = first_bid
 
-    # Convert to 1 minute data for every day (agg func = mean, alternatives: median;...)
-    mid_price = mid_price.groupby(pd.Grouper(freq='D')).resample(agg_time).mean().droplevel(0)
+    if last_ask > last_bid:
+        end_time = last_ask
+    else:
+        end_time = last_bid
 
-    # fill nan values (ignore end of the day)
-    mid_price = mid_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill()))
-    mid_price = mid_price.droplevel(0)
-    return mid_price
+    tr = pd.date_range(first_time, end_time, freq='s')
+    return tr
