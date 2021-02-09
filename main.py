@@ -20,8 +20,8 @@ data = data.set_index('time')
 data['mid_price'] = data['bid_price'] + data['ask_price']
 
 mid_price = data.pivot_table(index='time', columns='symbol', values='mid_price', aggfunc='mean')
-bid_price = data.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='mean')
-ask_price = data.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='mean')
+bid_price = data.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
+ask_price = data.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='last')
 
 del (data, folder_path, all_paths)
 
@@ -39,6 +39,7 @@ ask_price = ask_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_
 bid_price = bid_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill())).droplevel(0)
 
 mid_price = mid_price.groupby(pd.Grouper(freq='D')).resample('5Min').mean().droplevel(0)
+
 mid_price = mid_price.resample('D').apply(lambda x: x.apply(lambda x: x[:x.last_valid_index()].ffill())).droplevel(0)
 
 del (ask_index, bid_index, mid_index, time_range)

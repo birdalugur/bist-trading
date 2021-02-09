@@ -1,7 +1,7 @@
 import pandas as pd
 
-data = pd.read_csv("results/roll_300_freq_5Min_thr_1_int_False_wavelets_False_tradeTable.csv",
-                   parse_dates=['exit_time', 'entry_time'])
+data = pd.read_csv("tt.csv",
+                   parse_dates=['exit time', 'entry time'])
 data.drop('Unnamed: 0', axis=1, inplace=True)
 
 # Pairları oluştur
@@ -21,7 +21,7 @@ c_short = data.groupby('pair')['short'].cumsum()
 data['c_return'] = c_long + c_short
 
 # Her bir trade için süreler
-data['duration'] = data['exit_time'] - data['entry_time']
+data['duration'] = data['exit time'] - data['entry time']
 
 # Her pair için trade sayısı
 number_of_trades = data.groupby('pair').size()
