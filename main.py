@@ -7,15 +7,16 @@ import pandas as pd
 import mydata
 from trading_table import trading_table
 
-folder_path = 'data/'
+folder_path = 'data/201911.csv'
 
-all_paths = mydata.get_file_paths(folder_path)
+cols = ['symbol', 'time', 'bid_price', 'ask_price']
 
-data = mydata.read_multiple_data(all_paths)
+data = pd.read_csv(folder_path, converters={'time': lambda x: pd.Timestamp(int(x))}, usecols=cols)
 
 data = data[data.symbol.isin(mydata.BIST30)]
 
 data = data.set_index('time')
+
 
 data['mid_price'] = data['bid_price'] + data['ask_price']
 
@@ -23,7 +24,7 @@ mid_price = data.pivot_table(index='time', columns='symbol', values='mid_price',
 bid_price = data.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
 ask_price = data.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='last')
 
-del (data, folder_path, all_paths)
+del (data, folder_path)
 
 time_range = mydata.time_range(ask_price, bid_price)
 
@@ -46,7 +47,7 @@ del (ask_index, bid_index, mid_index, time_range)
 
 # parameters
 
-pair_names = mydata.pair_names
+pair_names = mydata.pair_names[0:5]
 data_freq = '5Min'
 window_size = 300
 threshold = 1
@@ -82,4 +83,4 @@ if __name__ == '__main__':
                 '_int_' + str(intercept) + \
                 '_wavelets_' + str(wavelet)
 
-    df_trade_table.to_csv(file_name + '_tradeTable' + '.csv')
+    df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)

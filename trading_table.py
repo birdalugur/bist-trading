@@ -97,5 +97,11 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, pair_name, threshol
 
     result = pd.concat([entry_data.reset_index(), exit_data.reset_index()], axis=1)
 
+    # Pairları oluştur
+    pairs = pd.concat([result.entry_symbol_1, result.entry_symbol_2], axis=1)
+    pairs = pairs.apply(lambda x: sorted(x), axis=1)
+    pairs = pairs.apply(lambda x: '_'.join(x))
+    result['pair'] = pairs
+
     return result
 
