@@ -9,15 +9,17 @@ import plotly.express as px
 
 from rpy2 import robjects
 from rpy2.robjects.packages import importr
-from rpy2.robjects.packages import PackageNotInstalledError
+# from rpy2.robjects.packages import PackageNotInstalledError
 
 utils = importr('utils')
 
-try:
-    wavelets = importr('wavelets')
-except PackageNotInstalledError:
-    utils.install_packages('wavelets')
-    wavelets = importr('wavelets')
+wavelets = importr('wavelets')
+
+# try:
+#     wavelets = importr('wavelets')
+# except PackageNotInstalledError:
+#     utils.install_packages('wavelets')
+#     wavelets = importr('wavelets')
 
 
 def convert_Rvectors(values):
