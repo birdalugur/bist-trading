@@ -8,17 +8,13 @@ import pandas as pd
 import mydata
 from trading_table import trading_table
 
-folder_path = 'data/201911.csv'
+folder_path = 'data.csv'
 
-cols = ['symbol', 'time', 'bid_price', 'ask_price']
+data = pd.read_csv(folder_path, parse_dates=['time'])
 
-data = pd.read_csv(folder_path, converters={'time': lambda x: pd.Timestamp(int(x))}, usecols=cols)
+pair_names = mydata.pair_names[0:3]
 
-data = data[data.symbol.isin(mydata.BIST30)]
-
-data = data.set_index('time')
-
-data['mid_price'] = data['bid_price'] + data['ask_price']
+data['mid_price'] = (data['bid_price'] + data['ask_price'])/2
 
 mid_price = data.pivot_table(index='time', columns='symbol', values='mid_price', aggfunc='mean')
 bid_price = data.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
@@ -43,9 +39,6 @@ def fill_nan(x):
     x = x[:x.last_valid_index()]
     x = x.ffill()
     return x
-
-
-pair_names = mydata.pair_names[0:3]
 
 
 def run(pair_name: str, opt: dict) -> pd.DataFrame:
@@ -86,10 +79,10 @@ def parallel_run(core, pairs, opt):
 if __name__ == '__main__':
     core = 8
     mid_freq = '5Min', '5Min', '10Min'
-    window_size = 300, 500, 400
-    threshold = 1, 2, 3
-    intercept = False, True, True
-    wavelet = False, True, False
+    window_size = 300, 400
+    threshold = 1, 2
+    intercept = False, True
+    wavelet = False, False
 
     opts = mydata.multi_opt(mid_freq=mid_freq,
                             window_size=window_size,

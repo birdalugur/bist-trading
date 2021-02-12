@@ -1,9 +1,8 @@
 import pandas as pd
 
-path = "tt.csv"
+path = "mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_tradeTable.csv"
 
 data = pd.read_csv(path, parse_dates=['exit time', 'entry time'])
-
 
 # Pairları oluştur
 pairs = pd.concat([data.entry_symbol_1, data.entry_symbol_2], axis=1)
@@ -33,17 +32,19 @@ return_median = data.groupby('pair')['return'].median()
 # Her pair için cumulative returnun son değeri
 last_c_return = data.groupby('pair')['c_return'].apply(lambda x: x.iloc[-1])
 
+# Her pair için cumulative returnun max değeri
+max_c_return = data.groupby('pair')['c_return'].max()
+
 duration_median = data.groupby('pair').apply(lambda x: x['duration'].median())
 
 mean_lastc_return = last_c_return / number_of_trades
 
-stats_data = pd.concat([last_c_return, number_of_trades, mean_lastc_return, duration_median, return_median], axis=1)
-columns = ['last_c_return', 'number_of_trade', 'mean_lastc_return', 'duration_median', 'return_median']
+stats_data = pd.concat(
+    [last_c_return, max_c_return, number_of_trades, mean_lastc_return, duration_median, return_median], axis=1)
+columns = ['last_c_return', 'max_c_return', 'number_of_trade', 'mean_lastc_return', 'duration_median', 'return_median']
 stats_data.columns = columns
 
-
-stats_data.to_csv('stats_'+path)
-
+stats_data.to_csv('stats_' + path)
 
 data = stats_data.sort_values('last_c_return', ascending=False)
 
@@ -55,5 +56,9 @@ avg_positive = data[data.last_c_return > 0].mean()
 
 avg_20 = data.head(20).mean()
 
-result = pd.DataFrame([average, avg_positive, avg_20, num_positive],
-                      index=['avg', 'positive_avg', 'first_20_avg', 'return_positive'])
+number_of_pairs = data.count()
+
+summary = pd.DataFrame([average, avg_positive, avg_20, num_positive, number_of_pairs],
+                       index=['avg', 'positive_avg', 'first_20_avg', 'number_of_positive_pair', 'number_of_pairs'])
+
+summary.to_csv('summary_' + path)
