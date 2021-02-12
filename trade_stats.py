@@ -1,8 +1,9 @@
 import pandas as pd
 
-data = pd.read_csv("tt.csv",
-                   parse_dates=['exit time', 'entry time'])
-data.drop('Unnamed: 0', axis=1, inplace=True)
+path = "tt.csv"
+
+data = pd.read_csv(path, parse_dates=['exit time', 'entry time'])
+
 
 # Pairları oluştur
 pairs = pd.concat([data.entry_symbol_1, data.entry_symbol_2], axis=1)
@@ -39,6 +40,10 @@ mean_lastc_return = last_c_return / number_of_trades
 stats_data = pd.concat([last_c_return, number_of_trades, mean_lastc_return, duration_median, return_median], axis=1)
 columns = ['last_c_return', 'number_of_trade', 'mean_lastc_return', 'duration_median', 'return_median']
 stats_data.columns = columns
+
+
+stats_data.to_csv('stats_'+path)
+
 
 data = stats_data.sort_values('last_c_return', ascending=False)
 

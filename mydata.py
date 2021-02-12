@@ -12,7 +12,6 @@ BIST30 = ["ARCLK", "ASELS", "BIMAS", "DOHOL", "EKGYO", "FROTO", "HALKB", "GARAN"
 
 pair_names = list(combinations(BIST30, 2))
 
-
 use_cols = ['symbol', 'time', 'bid_price', 'ask_price']
 
 date_columns = 'time'
@@ -78,7 +77,6 @@ def read(path: str, datecol: str = 'time', dt=None) -> pd.DataFrame:
     return pd.concat(all_data)
 
 
-
 def time_range(ask_price, bid_price):
     first_ask = ask_price.index[0]
     last_ask = ask_price.index[-1]
@@ -98,3 +96,31 @@ def time_range(ask_price, bid_price):
     tr = pd.date_range(first_time, end_time, freq='s')
     tr = pd.DatetimeIndex(tr.to_series().astype('datetime64[s]'))
     return tr
+
+
+def multi_opt(mid_freq, window_size, threshold, intercept, wavelet):
+    keys = ['mid_freq', 'window_size', 'threshold', 'intercept', 'wavelet']
+
+    try:
+        opt_values = list(zip(mid_freq, window_size, threshold, intercept, wavelet))
+    except TypeError:
+        return dict(zip(keys, [mid_freq, window_size, threshold, intercept, wavelet]))
+
+
+    opt_dicts = []
+
+    for opt in opt_values:
+        opt_dicts.append(dict(zip(keys, opt)))
+
+    return opt_dicts
+
+
+def get_file_name(opt):
+    file_name = str(opt)
+    file_name = file_name.strip("}{")
+    file_name = file_name.replace("\'", "")
+    file_name = file_name.replace(": ", "_")
+    file_name = file_name.replace(", ", "_")
+    return file_name
+
+

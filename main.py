@@ -2,10 +2,13 @@
 # coding: utf-8
 
 import multiprocessing
+from functools import partial
 import pandas as pd
 
 import mydata
 from trading_table import trading_table
+
+
 
 folder_path = 'data/201911.csv'
 
@@ -37,18 +40,6 @@ ask_price = ask_price.reindex(ask_index)
 
 del (ask_index, bid_index, mid_index, time_range)
 
-# parameters
-
-pair_names = mydata.pair_names
-data_freq = '5Min'
-window_size = 300
-threshold = 1
-intercept = False
-wavelet = False
-
-all_stats = []
-all_buy_sell = []
-
 
 def fill_nan(x):
     x = x[:x.last_valid_index()]
@@ -56,10 +47,20 @@ def fill_nan(x):
     return x
 
 
-def run(pair_name):
+pair_names = mydata.pair_names[0:3]
+
+
+def run(pair_name: str, opt: dict) -> pd.DataFrame:
     print(pair_name)
+
+    mid_freq = opt['mid_freq']
+    window_size = opt['window_size']
+    threshold = opt['threshold']
+    intercept = opt['intercept']
+    wavelet = opt['wavelet']
+
     pair_mid = mid_price.loc[:, pair_name]
-    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample('5Min').mean().droplevel(0)
+    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
     pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
 
     pair_ask = ask_price.loc[:, pair_name]
@@ -72,21 +73,33 @@ def run(pair_name):
     pair_ask.dropna(inplace=True)
     pair_bid.dropna(inplace=True)
 
-    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, pair_name, threshold, intercept, wavelet)
+    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet)
 
     return trade_table
 
 
+
 if __name__ == '__main__':
+    mid_freq = '5Min', '5Min', '10Min'
+    window_size = 300, 500, 400
+    threshold = 1, 2, 3
+    intercept = False, True, True
+    wavelet = False, True, False
+
+    opts = mydata.multi_opt(mid_freq=mid_freq,
+                            window_size=window_size,
+                            threshold=threshold,
+                            intercept=intercept,
+                            wavelet=wavelet)
+
     pool = multiprocessing.Pool(processes=8)
-    results = pool.map(run, pair_names)
 
-    df_trade_table = pd.concat(results)
+    for opt in opts:
+        run_with_opt = partial(run, opt=opt)
 
-    file_name = 'roll_' + str(window_size) + \
-                '_freq_' + data_freq + \
-                '_thr_' + str(threshold) + \
-                '_int_' + str(intercept) + \
-                '_wavelets_' + str(wavelet)
+        results = pool.map(run_with_opt, pair_names)
+        df_trade_table = pd.concat(results)
 
-    df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+        file_name = mydata.get_file_name(opt)
+        df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+
