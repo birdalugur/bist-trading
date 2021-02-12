@@ -8,8 +8,6 @@ import pandas as pd
 import mydata
 from trading_table import trading_table
 
-
-
 folder_path = 'data/201911.csv'
 
 cols = ['symbol', 'time', 'bid_price', 'ask_price']
@@ -78,8 +76,15 @@ def run(pair_name: str, opt: dict) -> pd.DataFrame:
     return trade_table
 
 
+def parallel_run(core, pairs, opt):
+    pool = multiprocessing.Pool(processes=core)
+    run_with_opt = partial(run, opt=opt)
+    result = pool.map(run_with_opt, pairs)
+    return pd.concat(result)
+
 
 if __name__ == '__main__':
+    core = 8
     mid_freq = '5Min', '5Min', '10Min'
     window_size = 300, 500, 400
     threshold = 1, 2, 3
@@ -92,14 +97,7 @@ if __name__ == '__main__':
                             intercept=intercept,
                             wavelet=wavelet)
 
-    pool = multiprocessing.Pool(processes=8)
-
     for opt in opts:
-        run_with_opt = partial(run, opt=opt)
-
-        results = pool.map(run_with_opt, pair_names)
-        df_trade_table = pd.concat(results)
-
+        df_trade_table = parallel_run(core, pair_names, opt)
         file_name = mydata.get_file_name(opt)
         df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
-
