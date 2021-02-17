@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 from plotly.offline import plot
 import pandas as pd
 
-path = 'roll_300_freq_5Min_thr_1_int_False_wavelets_False_tradeTable.csv'
+path = 'mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_tradeTable.csv'
 
 data = pd.read_csv(path)
 
@@ -33,4 +33,6 @@ fig = go.Figure()
 
 fig.add_traces(lines)
 
-plot(fig, auto_open=False, filename='cumulative sum.html')
+plot_name = path.split('.')[0]
+
+plot(fig, auto_open=False, filename=plot_name+'.html')
