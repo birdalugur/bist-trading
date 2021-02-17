@@ -58,7 +58,13 @@ if __name__ == '__main__':
                             intercept=intercept,
                             wavelet=wavelet)
 
-    for opt in opts:
+    if isinstance(opts,dict):
+        opt = opts
         df_trade_table = parallel_run(core, pair_names, opt)
         file_name = mydata.get_file_name(opt)
         df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+    else:
+        for opt in opts:
+            df_trade_table = parallel_run(core, pair_names, opt)
+            file_name = mydata.get_file_name(opt)
+            df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
