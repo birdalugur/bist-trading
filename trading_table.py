@@ -1,6 +1,5 @@
 import pandas as pd
 
-import mydata
 import residual
 import selling
 import rolling
