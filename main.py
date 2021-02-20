@@ -22,13 +22,13 @@ def create_time_range(df):
     return indexes
 
 
-def multi_opt(mid_freq, window_size, threshold, intercept, wavelet):
-    keys = ['mid_freq', 'window_size', 'threshold', 'intercept', 'wavelet']
+def multi_opt(mid_freq, window_size, threshold, intercept, wavelet, ln):
+    keys = ['mid_freq', 'window_size', 'threshold', 'intercept', 'wavelet', 'ln']
 
     try:
-        opt_values = list(zip(mid_freq, window_size, threshold, intercept, wavelet))
+        opt_values = list(zip(mid_freq, window_size, threshold, intercept, wavelet, ln))
     except TypeError:
-        return dict(zip(keys, [mid_freq, window_size, threshold, intercept, wavelet]))
+        return dict(zip(keys, [mid_freq, window_size, threshold, intercept, wavelet, ln]))
 
     opt_dicts = []
 
@@ -50,6 +50,9 @@ def get_file_name(opt):
 data = pd.read_csv(folder_path, parse_dates=['time'])
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
+ln=True
+if ln:
+    data['mid_price'] = np.log(data['mid_price'])
 print('data ok!')
 
 pair_names = list(combinations(data.symbol.unique(), 2))
@@ -132,7 +135,8 @@ if __name__ == '__main__':
                      window_size=window_size,
                      threshold=threshold,
                      intercept=intercept,
-                     wavelet=wavelet)
+                     wavelet=wavelet,
+                     ln=ln)
     if isinstance(opts, dict):
         opt = opts
         df_trade_table = parallel_run(core, pair_names, opt)
