@@ -29,11 +29,9 @@ def windows(data, window: Union[int, pd.Timedelta]) -> list:
     return list(windows)[window_value - 1:]
 
 
-
 def std(values, window_size):
     std_window = windows(values, window_size)
     idx = map(lambda x: x.index[-1], std_window)
     std_values = map(lambda x: x.std(), std_window)
 
     return pd.Series(std_values, index=idx, name='std')
-

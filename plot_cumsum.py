@@ -35,4 +35,4 @@ fig.add_traces(lines)
 
 plot_name = path.split('.')[0]
 
-plot(fig, auto_open=False, filename=plot_name+'.html')
+plot(fig, auto_open=False, filename=plot_name + '.html')

@@ -39,14 +39,13 @@ path_df = path_df[path_df['year_month'].isin(use_date)]
 
 path_bist30 = path_df[path_df['symbol'].isin(BIST30)]
 
-
 count = 0
 
 
 def read_data(_path: str) -> pd.DataFrame:
     global count
     count = count + 1
-    print(count,'. veri okunuyor -> ', _path)
+    print(count, '. veri okunuyor -> ', _path)
     try:
         return pd.read_csv(_path, usecols=use_cols, converters={date_columns: lambda x: pd.Timestamp(int(x))})
     except pd.errors.EmptyDataError:

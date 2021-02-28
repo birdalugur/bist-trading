@@ -7,6 +7,7 @@ import datetime
 from functools import partial
 import pandas as pd
 from itertools import combinations
+import numpy as np
 
 from trading_table import trading_table
 
@@ -50,9 +51,7 @@ def get_file_name(opt):
 data = pd.read_csv(folder_path, parse_dates=['time'])
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
-ln=True
-if ln:
-    data['mid_price'] = np.log(data['mid_price'])
+
 print('data ok!')
 
 pair_names = list(combinations(data.symbol.unique(), 2))
@@ -95,12 +94,16 @@ def run(pair_name: str, opt: dict) -> pd.DataFrame:
     threshold = opt['threshold']
     intercept = opt['intercept']
     wavelet = opt['wavelet']
+    ln = opt['ln']
 
     pair_bid, pair_ask, pair_mid = create_bid_ask_mid(pair_name)
     # pair_mid = mid_price.loc[:, iter]
     pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
     pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
     pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
+
+    if ln:
+        pair_mid = np.log(pair_mid)
 
     # pair_ask = ask_price.loc[:, pair_name]
     pair_ask = pair_ask.resample('D').apply(fill_nan).droplevel(0)
@@ -130,6 +133,7 @@ if __name__ == '__main__':
     threshold = 1
     intercept = False
     wavelet = False
+    ln = True
 
     opts = multi_opt(mid_freq=mid_freq,
                      window_size=window_size,

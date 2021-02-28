@@ -1,8 +1,9 @@
 import pandas as pd
 
 import residual
-import selling
+import returns
 import rolling
+import signal
 
 
 def get_first_prices(ts, points):
@@ -38,12 +39,12 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    signal_1, signal_2 = selling.get_signal(residuals, std)
+    signal_1, signal_2 = signal.get_signal(residuals, std)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
-    entry_points_s1, exit_points_s1 = selling.signal_points(signal_1)
-    entry_points_s2, exit_points_s2 = selling.signal_points(signal_2)
+    entry_points_s1, exit_points_s1 = signal.signal_points(signal_1)
+    entry_points_s2, exit_points_s2 = signal.signal_points(signal_2)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Signal 1'den gelen pointslerden pair_0 short yani -> Sell
@@ -69,7 +70,6 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
 
     exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1)
     exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
-
 
     buy1_entry = pd.DataFrame({'entry_price_1': entry_price_buy_1, 'entry_symbol_1': entry_price_buy_1.name})
     buy2_entry = pd.DataFrame({'entry_price_1': entry_price_buy_2, 'entry_symbol_1': entry_price_buy_2.name})
@@ -103,4 +103,3 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     result['pair'] = pairs
 
     return result
-

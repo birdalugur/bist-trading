@@ -1,10 +1,5 @@
-import numpy as np
 import pandas as pd
-from typing import Union
-from itertools import combinations
 import statsmodels.api as sm
-import random
-import plotly.express as px
 from wavelets import mra_s1
 
 
@@ -61,4 +56,3 @@ def rollPair(pair, window, intercept=False, w_la8_1=False):
         all_values.append(value)
 
     return pd.Series(all_values, index=all_idx, name=name)
-
