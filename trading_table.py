@@ -3,7 +3,7 @@ import pandas as pd
 import residual
 import returns
 import rolling
-import signal
+import signals
 
 
 def get_first_prices(ts, points):
@@ -39,12 +39,12 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    signal_1, signal_2 = signal.get_signal(residuals, std)
+    signal_1, signal_2 = signals.get_signal(residuals, std)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
-    entry_points_s1, exit_points_s1 = signal.signal_points(signal_1)
-    entry_points_s2, exit_points_s2 = signal.signal_points(signal_2)
+    entry_points_s1, exit_points_s1 = signals.signal_points(signal_1)
+    entry_points_s2, exit_points_s2 = signals.signal_points(signal_2)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Signal 1'den gelen pointslerden pair_0 short yani -> Sell

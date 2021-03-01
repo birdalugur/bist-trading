@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_signal(x, thresholds=[]):
@@ -41,16 +42,19 @@ def get_signal(x, thresholds=[]):
     signal_1 = pd.Series(signal_1, index=idx, name='signal_1').replace({False: 0, True: 1})
     signal_2 = pd.Series(signal_2, index=idx, name='signal_2').replace({False: 0, True: 1})
 
-    return signal_1.shift(), signal_2.shift()
+    signal1, signal2 = signal_1.shift(), signal_2.shift()
+
+    return pd.DataFrame({'signal1': signal1, 'signal2': signal2})
 
 
 def get_signals2(residuals, std):
     list_signal1, list_signal2 = [], []
 
+    idx = residuals.index
+
     number_of_nans = residuals.isna().value_counts()[True]
 
     for i in range(number_of_nans):
-        print('nan')
         list_signal1.append(np.nan)
         list_signal2.append(np.nan)
 
@@ -90,7 +94,7 @@ def get_signals2(residuals, std):
         list_signal1.append(signal1)
         list_signal2.append(signal2)
 
-    return pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2})
+    return pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2},index=idx)
 
 
 def signal_points(signal: pd.Series) -> [pd.Index, pd.Index]:
