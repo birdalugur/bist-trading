@@ -39,7 +39,8 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    signal_1, signal_2 = signals.get_signal(residuals, std)
+    all_signals = signals.get_signal(residuals, std)
+    signal_1, signal_2 = all_signals['signal1'], all_signals['signal2']
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>

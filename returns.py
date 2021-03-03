@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import signals
 
 
 # def get_return(entry_vals, exit_points_vals):
@@ -63,7 +64,31 @@ def calc_selling(data, entry, exit_points, type):
     return pd.concat(all_selling)
 
 
-def get_return(prices, all_signals):
+def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate'):
+    def get_first_prices(ts, points):
+        """Verilen zamana ait ilk işlemi döndürür. İşlem yoksa NaN kabul edilir."""
+
+        new_ts = pd.DataFrame(columns=ts.columns)
+        ts = ts.dropna()
+
+        for point in points:
+            # t = point.strftime('%Y-%m-%d %H:%M')
+            t = str(point)
+            x = ts.loc[t]
+
+            if len(x) == 0:
+                be_added = pd.DataFrame(columns=ts.columns, index=[point])
+            else:
+                be_added = x.head(1)
+            new_ts = new_ts.append(be_added)
+
+        return new_ts
+
+    idx = mid_price.index
+    ask_price = get_first_prices(ask_price, idx)
+
+    bid_price = get_first_prices(bid_price, idx)
+
     signal_1, signal_2 = all_signals['signal1'], all_signals['signal2']
 
     # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
@@ -72,11 +97,11 @@ def get_return(prices, all_signals):
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Calculation long / short returns (All Returns) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    return_short_s1 = -calc_selling(prices.iloc[:, 0], entry_points_s1, exit_points_s1, '100')
-    return_long_s1 = calc_selling(prices.iloc[:, 1], entry_points_s1, exit_points_s1, '100')
+    return_short_s1 = -calc_selling(bid_price.iloc[:, 0], entry_points_s1, exit_points_s1, return_type)
+    return_long_s1 = calc_selling(ask_price.iloc[:, 1], entry_points_s1, exit_points_s1, return_type)
 
-    return_short_s2 = -calc_selling(prices.iloc[:, 1], entry_points_s2, exit_points_s2, '100')
-    return_long_s2 = calc_selling(prices.iloc[:, 0], entry_points_s2, exit_points_s2, '100')
+    return_short_s2 = -calc_selling(ask_price.iloc[:, 1], entry_points_s2, exit_points_s2, return_type)
+    return_long_s2 = calc_selling(bid_price.iloc[:, 0], entry_points_s2, exit_points_s2, return_type)
 
     total_return_s1 = return_short_s1 + return_long_s1
     total_return_s2 = return_short_s2 + return_long_s2
@@ -84,3 +109,4 @@ def get_return(prices, all_signals):
     total_return = total_return_s1.append(total_return_s2).sort_index()
 
     return total_return
+
