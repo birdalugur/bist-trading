@@ -21,6 +21,7 @@ def get_first_prices(ts, points):
             be_added = pd.Series(data=None, index=[point])
         else:
             be_added = x.head(1)
+            be_added.index = [point]
         new_ts = new_ts.append(be_added)
     new_ts.name = ts.name
 
@@ -48,17 +49,15 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     entry_points_s2, exit_points_s2 = signals.signal_points(signal_2)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    # Signal 1'den gelen pointslerden pair_0 short yani -> Sell
-    # Signal 1'den gelen pointslerden pair_1 long yani -> Buy
+    # Signal 1'den gelen pointslerden pair_0 short yani -> Sell -> bid price
+    # Signal 1'den gelen pointslerden pair_1 long yani -> Buy -> ask price
 
-    # Signal 2'den gelen pointslerden pair_0 long yani -> Buy
-    # Signal 2'den gelen pointslerden pair_1 short yani -> Sell
+    # Signal 2'den gelen pointslerden pair_0 long yani -> Buy -> ask price
+    # Signal 2'den gelen pointslerden pair_1 short yani -> Sell -> bid price
 
     # S'ler price 2 ' ye
     # B'ler price 1 ' e
 
-    # ask price -> alım fiyatı
-    # bid price -> satış fiyatı
 
     entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1)
     entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2)

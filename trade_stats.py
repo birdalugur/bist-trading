@@ -1,14 +1,8 @@
 import pandas as pd
 
-path = "mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_tradeTable.csv"
+path = "compare files/mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_ln_False_tradeTable.csv"
 
 data = pd.read_csv(path, parse_dates=['exit time', 'entry time'])
-
-# Pairları oluştur
-pairs = pd.concat([data.entry_symbol_1, data.entry_symbol_2], axis=1)
-pairs = pairs.apply(lambda x: sorted(x), axis=1)
-pairs = pairs.apply(lambda x: '_'.join(x))
-data['pair'] = pairs
 
 # Return hesapla
 data['long'] = (data['exit_price_1'] - data['entry_price_1']) * 100

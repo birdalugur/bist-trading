@@ -65,7 +65,7 @@ def parallel_run(core, pairs, opt):
 
 
 if __name__ == '__main__':
-    core = 32
+    core = 8
     mid_freq = '5Min'
     window_size = 300
     threshold = 1

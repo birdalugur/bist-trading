@@ -94,7 +94,7 @@ def get_signals2(residuals, std):
         list_signal1.append(signal1)
         list_signal2.append(signal2)
 
-    return pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2},index=idx)
+    return pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2}, index=idx)
 
 
 def signal_points(signal: pd.Series) -> [pd.Index, pd.Index]:

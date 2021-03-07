@@ -4,13 +4,12 @@ import plotly.offline as offline
 import pandas as pd
 
 
-def plot_signals(residuals, std, signal_func):
+def plot_signals(residuals, std, signal_func, title=None):
     x = signal_func(residuals, std)
 
-    res = pd.concat([residuals.reset_index(drop=True), std.reset_index(drop=True), x.reset_index(drop=True)], axis=1)
+    res = pd.concat([residuals, std, x], axis=1)
 
     res.dropna(inplace=True)
-    res.reset_index(inplace=True, drop=True)
 
     fig_res = go.Scatter(x=res.index, y=res.iloc[:, 0], name='residuals', line_color='rgb(45,197,197)')
     fig_std = go.Scatter(x=res.index, y=res.iloc[:, 1], name='std', line_color='rgb(248,195,184)')
@@ -27,7 +26,11 @@ def plot_signals(residuals, std, signal_func):
 
     fig.add_traces([fig_res, fig_std, fig_std2, fig_s1, fig_s2])
 
-    offline.plot(fig)
+    if title:
+        lyt = go.Layout(title=go.layout.Title(text=title))
+        fig.update_layout(lyt)
+
+    offline.plot(fig, filename=title)
 
 
 def plot_return(total_return, title=None):

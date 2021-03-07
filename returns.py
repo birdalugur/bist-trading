@@ -64,22 +64,25 @@ def calc_selling(data, entry, exit_points, type):
     return pd.concat(all_selling)
 
 
-def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate'):
-    def get_first_prices(ts, points):
+def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate', freq='5Min'):
+    def get_first_prices(ts, points, freq=freq):
         """Verilen zamana ait ilk işlemi döndürür. İşlem yoksa NaN kabul edilir."""
 
         new_ts = pd.DataFrame(columns=ts.columns)
         ts = ts.dropna()
+        up_time = pd.Timedelta(freq) - pd.Timedelta(nanoseconds=1)
 
         for point in points:
-            # t = point.strftime('%Y-%m-%d %H:%M')
-            t = str(point)
-            x = ts.loc[t]
+            start_time = pd.Timestamp(point)
+            end_time = start_time + up_time
+            x = ts.loc[start_time:end_time]
+            x = x.dropna()
 
             if len(x) == 0:
                 be_added = pd.DataFrame(columns=ts.columns, index=[point])
             else:
                 be_added = x.head(1)
+                be_added.index = [point]
             new_ts = new_ts.append(be_added)
 
         return new_ts
@@ -100,13 +103,15 @@ def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate')
     return_short_s1 = -calc_selling(bid_price.iloc[:, 0], entry_points_s1, exit_points_s1, return_type)
     return_long_s1 = calc_selling(ask_price.iloc[:, 1], entry_points_s1, exit_points_s1, return_type)
 
-    return_short_s2 = -calc_selling(ask_price.iloc[:, 1], entry_points_s2, exit_points_s2, return_type)
-    return_long_s2 = calc_selling(bid_price.iloc[:, 0], entry_points_s2, exit_points_s2, return_type)
+    return_long_s2 = calc_selling(ask_price.iloc[:, 0], entry_points_s2, exit_points_s2, return_type)
+    return_short_s2 = -calc_selling(bid_price.iloc[:, 1], entry_points_s2, exit_points_s2, return_type)
 
     total_return_s1 = return_short_s1 + return_long_s1
     total_return_s2 = return_short_s2 + return_long_s2
 
     total_return = total_return_s1.append(total_return_s2).sort_index()
+
+    total_return.dropna(inplace=True)
 
     return total_return
 
