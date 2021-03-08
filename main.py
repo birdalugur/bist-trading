@@ -11,6 +11,7 @@ import numpy as np
 
 from trading_table import trading_table
 import auxiliary as aux
+import signals
 
 start = time.time()
 folder_path = 'data/data_202010.csv'
@@ -27,7 +28,7 @@ pair_names = list(combinations(data.symbol.unique(), 2))
 # data = data[data.symbol.isin(['GARAN', 'TSKB'])]
 
 
-def run(pair_name: str, opt: dict) -> pd.DataFrame:
+def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     print(pair_name)
 
     mid_freq = opt['mid_freq']
@@ -53,13 +54,13 @@ def run(pair_name: str, opt: dict) -> pd.DataFrame:
     pair_ask.dropna(inplace=True)
     pair_bid.dropna(inplace=True)
 
-    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet)
+    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func)
     return trade_table
 
 
-def parallel_run(core, pairs, opt):
+def parallel_run(core, pairs, opt, signal_func):
     pool = multiprocessing.Pool(processes=core)
-    run_with_opt = partial(run, opt=opt)
+    run_with_opt = partial(run, opt=opt, signal_func=signal_func)
     result = pool.map(run_with_opt, pairs)
     return pd.concat(result)
 
@@ -72,6 +73,7 @@ if __name__ == '__main__':
     intercept = False
     wavelet = False
     ln = False
+    signal_func = signals.get_signal2
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,
@@ -82,12 +84,12 @@ if __name__ == '__main__':
 
     if isinstance(opts, dict):
         opt = opts
-        df_trade_table = parallel_run(core, pair_names, opt)
-        file_name = aux.get_file_name(opt)
+        df_trade_table = parallel_run(core, pair_names, opt, signal_func)
+        file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
         df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
     else:
         for opt in opts:
-            df_trade_table = parallel_run(core, pair_names, opt)
-            file_name = aux.get_file_name(opt)
+            df_trade_table = parallel_run(core, pair_names, opt, signal_func)
+            file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
             df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
 print(time.time() - start)

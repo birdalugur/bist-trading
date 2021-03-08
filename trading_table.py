@@ -28,7 +28,7 @@ def get_first_prices(ts, points):
     return new_ts
 
 
-def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet):
+def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func):
     # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
     all_windows = rolling.windows(pair_mid, window_size)
     residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
@@ -40,7 +40,7 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # Find signals >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    all_signals = signals.get_signal(residuals, std)
+    all_signals = signal_func(residuals, std)
     signal_1, signal_2 = all_signals['signal1'], all_signals['signal2']
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

@@ -52,7 +52,7 @@ residuals = residuals.dropna().reindex(pair_mid.index)
 std = std.dropna().reindex(pair_mid.index) * threshold
 
 plot.plot_signals(residuals, std, signals.get_signal, 'Signal V1')
-plot.plot_signals(residuals, std, signals.get_signals2, 'Signal V2')
+plot.plot_signals(residuals, std, signals.get_signal2, 'Signal V2')
 
 all_signals = signals.get_signal(residuals, std)
 

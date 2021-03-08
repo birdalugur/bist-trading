@@ -47,7 +47,7 @@ def get_signal(x, thresholds=[]):
     return pd.DataFrame({'signal1': signal1, 'signal2': signal2})
 
 
-def get_signals2(residuals, std):
+def get_signal2(residuals, std):
     list_signal1, list_signal2 = [], []
 
     idx = residuals.index
