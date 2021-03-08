@@ -41,6 +41,8 @@ pair_mid.dropna(inplace=True)
 pair_ask.dropna(inplace=True)
 pair_bid.dropna(inplace=True)
 
+plot.plot_line(pair_mid, 'Mid Price')
+
 all_windows = rolling.windows(pair_mid, window_size)
 residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
 std = [resid.std() for resid in residuals]
@@ -52,9 +54,12 @@ std = std.dropna().reindex(pair_mid.index) * threshold
 plot.plot_signals(residuals, std, signals.get_signal, 'Signal V1')
 plot.plot_signals(residuals, std, signals.get_signals2, 'Signal V2')
 
-all_signals = signals.get_signals2(residuals, std)
+all_signals = signals.get_signal(residuals, std)
 
 return_values = returns.get_return(pair_ask, pair_bid, pair_mid, all_signals, 'rate', mid_freq)
-return_values.to_csv('all_return v2.csv')
 
 plot.plot_return(return_values, 'GARAN_TSKB - Signal V2')
+
+trade_times = signals.trade_times(all_signals)
+
+plot.plot_trades(return_values, trade_times, 'Return Values - Signal V1')

@@ -1,10 +1,14 @@
 import plotly.graph_objects as go
 import plotly.offline as offline
+import plotly.express as px
 
 import pandas as pd
 
 
 def plot_signals(residuals, std, signal_func, title=None):
+    """
+    Residuals ve std üzerinde sinyallerin nerede açılıp kapandığını görmek için.
+    """
     x = signal_func(residuals, std)
 
     res = pd.concat([residuals, std, x], axis=1)
@@ -34,6 +38,9 @@ def plot_signals(residuals, std, signal_func, title=None):
 
 
 def plot_return(total_return, title=None):
+    """
+    Tradelerin return ve cumreturn değerlerini çizer.
+    """
     cum_return = total_return.cumsum()
 
     fig_return = go.Scatter(x=total_return.index, y=total_return.values, name='return', line_color='rgb(45,197,197)')
@@ -83,3 +90,34 @@ def plot_all_cumsum(path):
     plot_name = path.split('.')[0]
 
     offline.plot(fig, auto_open=False, filename=plot_name + '.html')
+
+
+def plot_line(data, title):
+    """Tek pair'a ait Mid Price'ları çizmek için"""
+    fig = px.line(data)
+    if title:
+        lyt = go.Layout(title=go.layout.Title(text=title))
+        fig.update_layout(lyt)
+    offline.plot(fig, filename=title)
+
+
+def plot_trades(return_values, trade_times, title=None):
+    """
+    Her bir trade'in ayrı ayrı returnlerini çizer.
+    """
+    all_traces = []
+
+    fig = go.Figure()
+
+    for i in range(len(trade_times)):
+        trade = return_values.loc[trade_times.loc[i].entry_time:trade_times.loc[i].exit_time]
+        trace = go.Scatter(x=trade.index, y=trade.values, name='Trade ' + str(i))
+        all_traces.append(trace)
+
+    fig.add_traces(all_traces)
+
+    if title:
+        lyt = go.Layout(title=go.layout.Title(text=title))
+        fig.update_layout(lyt)
+
+    offline.plot(fig, filename=title)

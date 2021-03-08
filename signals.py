@@ -108,3 +108,20 @@ def signal_points(signal: pd.Series) -> [pd.Index, pd.Index]:
         entry_points = entry_points[0:len(exit_points_points)]
         # exit_points_points = exit_points_points.append(pd.DatetimeIndex([signal.index[-1]]))
     return entry_points, exit_points_points
+
+
+def trade_times(all_signals):
+    """
+    Get the entry and exit time of each trade
+    """
+    signal_1, signal_2 = all_signals['signal1'], all_signals['signal2']
+
+    # Mark entry - exit points >>>>>>>>>>>>>>>>>>>>>>>>>
+    entry_points_s1, exit_points_s1 = signal_points(signal_1)
+    entry_points_s2, exit_points_s2 = signal_points(signal_2)
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    entry = entry_points_s1.append(entry_points_s2)
+    exit = exit_points_s1.append(exit_points_s2)
+
+    return pd.DataFrame({'entry_time': entry, 'exit_time': exit})
