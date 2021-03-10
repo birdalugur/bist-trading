@@ -113,5 +113,18 @@ def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate',
 
     total_return.dropna(inplace=True)
 
-    return total_return
+    trade_times = signals.trade_times(all_signals)
 
+    short = return_short_s1.append(return_short_s2).dropna()
+    long = return_long_s1.append(return_long_s2).dropna()
+
+    total_return = total_return.to_frame('return_value')
+    total_return['trade_no'] = 0
+
+    for i in range(len(trade_times)):
+        total_return.loc[trade_times.loc[i].entry_time:trade_times.loc[i].exit_time].loc[:, 'trade_no'] = i
+
+    total_return['short'] = short
+    total_return['long'] = long
+
+    return total_return

@@ -17,14 +17,14 @@ data = pd.read_csv(folder_path, parse_dates=['time'])
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
 
-pair_name = ('GARAN', 'TSKB')
+pair_name = ('DOHOL', 'PETKM')
 
-mid_freq = '5Min'
+mid_freq = '10Min'
 window_size = 300
 threshold = 1
-intercept = False
+intercept = True
 wavelet = False
-ln = False
+ln = True
 
 pair_bid, pair_ask, pair_mid = aux.create_bid_ask_mid(pair_name, data)
 pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
@@ -58,8 +58,8 @@ all_signals = signals.get_signal(residuals, std)
 
 return_values = returns.get_return(pair_ask, pair_bid, pair_mid, all_signals, 'rate', mid_freq)
 
-plot.plot_return(return_values, 'GARAN_TSKB - Signal V2')
+plot.plot_return(return_values['return_value'], 'GARAN_TSKB - Signal V2')
 
 trade_times = signals.trade_times(all_signals)
 
-plot.plot_trades(return_values, trade_times, 'Return Values - Signal V1')
+plot.plot_trades(return_values['return_value'], trade_times, 'Return Values - Signal V1')
