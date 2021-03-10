@@ -25,6 +25,8 @@ threshold = 1
 intercept = True
 wavelet = False
 ln = True
+signal_func = signals.get_signal2
+name = '_'.join(pair_name) + '_' + signal_func.__name__.split('_')[1]
 
 pair_bid, pair_ask, pair_mid = aux.create_bid_ask_mid(pair_name, data)
 pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
@@ -51,15 +53,14 @@ std = pd.Series(std, index=residuals.index)
 residuals = residuals.dropna().reindex(pair_mid.index)
 std = std.dropna().reindex(pair_mid.index) * threshold
 
-plot.plot_signals(residuals, std, signals.get_signal, 'Signal V1')
-plot.plot_signals(residuals, std, signals.get_signal2, 'Signal V2')
+plot.plot_signals(residuals, std, signal_func, name)
 
-all_signals = signals.get_signal(residuals, std)
+all_signals = signal_func(residuals, std)
 
 return_values = returns.get_return(pair_ask, pair_bid, pair_mid, all_signals, 'rate', mid_freq)
 
-plot.plot_return(return_values['return_value'], 'GARAN_TSKB - Signal V2')
+plot.plot_return(return_values['return_value'], name)
 
 trade_times = signals.trade_times(all_signals)
 
-plot.plot_trades(return_values['return_value'], trade_times, 'Return Values - Signal V1')
+plot.plot_trades(return_values['return_value'], trade_times, 'Return Values - ' + name)
