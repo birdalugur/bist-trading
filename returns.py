@@ -113,7 +113,7 @@ def get_return(ask_price, bid_price, mid_price, all_signals, return_type='rate',
 
     total_return.dropna(inplace=True)
 
-    trade_times = signals.trade_times(all_signals)
+    trade_times = signals.trade_times(all_signals).sort_values('exit_time').reset_index(drop=True)
 
     short = return_short_s1.append(return_short_s2).dropna()
     long = return_long_s1.append(return_long_s2).dropna()
