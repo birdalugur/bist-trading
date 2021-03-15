@@ -43,7 +43,7 @@ pair_mid.dropna(inplace=True)
 pair_ask.dropna(inplace=True)
 pair_bid.dropna(inplace=True)
 
-plot.plot_line(pair_mid, 'Mid Price')
+plot.plot_line(pair_mid, 'Mid Price.html')
 
 all_windows = rolling.windows(pair_mid, window_size)
 residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))

@@ -34,7 +34,7 @@ def plot_signals(residuals, std, signal_func, title=None):
         lyt = go.Layout(title=go.layout.Title(text=title))
         fig.update_layout(lyt)
 
-    offline.plot(fig, filename=title)
+    offline.plot(fig, filename=title + '.html')
 
 
 def plot_return(total_return, title=None):
@@ -51,7 +51,7 @@ def plot_return(total_return, title=None):
     if title:
         lyt = go.Layout(title=go.layout.Title(text=title))
         fig.update_layout(lyt)
-    offline.plot(fig, filename=title)
+    offline.plot(fig, filename=title + '.html')
 
 
 def plot_all_cumsum(path):
@@ -98,7 +98,7 @@ def plot_line(data, title):
     if title:
         lyt = go.Layout(title=go.layout.Title(text=title))
         fig.update_layout(lyt)
-    offline.plot(fig, filename=title)
+    offline.plot(fig, filename=title + '.html')
 
 
 def plot_trades(return_values, trade_times, title=None):
@@ -120,4 +120,4 @@ def plot_trades(return_values, trade_times, title=None):
         lyt = go.Layout(title=go.layout.Title(text=title))
         fig.update_layout(lyt)
 
-    offline.plot(fig, filename=title)
+    offline.plot(fig, filename=title + '.html')
