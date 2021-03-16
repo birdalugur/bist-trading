@@ -67,13 +67,16 @@ def parallel_run(core, pairs, opt, signal_func):
 
 if __name__ == '__main__':
     core = 8
-    mid_freq = '5Min'
-    window_size = 300
-    threshold = 1
-    intercept = False
-    wavelet = False
-    ln = False
-    signal_func = signals.get_signal2
+    mid_freq = '5Min', '2Min', '10Min'
+    window_size = 300,
+    threshold = 1,
+    intercept = False,
+    wavelet = False,
+    ln = False, True
+
+    signal_func = signals.get_signal2, signals.get_signal
+
+    
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,

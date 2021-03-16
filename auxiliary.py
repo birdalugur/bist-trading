@@ -1,5 +1,6 @@
 import pandas as pd
 import datetime
+import itertools
 
 
 def get_file_name(opt):
@@ -45,10 +46,7 @@ def create_bid_ask_mid(pair, data):
 def multi_opt(mid_freq, window_size, threshold, intercept, wavelet, ln):
     keys = ['mid_freq', 'window_size', 'threshold', 'intercept', 'wavelet', 'ln']
 
-    try:
-        opt_values = list(zip(mid_freq, window_size, threshold, intercept, wavelet, ln))
-    except TypeError:
-        return dict(zip(keys, [mid_freq, window_size, threshold, intercept, wavelet, ln]))
+    opt_values = list(itertools.product(mid_freq, window_size, threshold, intercept, wavelet, ln))
 
     opt_dicts = []
 
