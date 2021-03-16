@@ -6,7 +6,7 @@ import multiprocessing
 import datetime
 from functools import partial
 import pandas as pd
-from itertools import combinations
+from itertools import combinations, permutations
 import numpy as np
 
 from trading_table import trading_table
@@ -20,9 +20,13 @@ data = pd.read_csv(folder_path, parse_dates=['time'])
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
 
-print('data ok!')
+reverse = False
 
 pair_names = list(combinations(data.symbol.unique(), 2))
+
+if reverse:
+    all_pairs = list(permutations(data.symbol.unique(), 2))
+    pair_names = list(set(all_pairs)-set(pair_names))
 
 
 # data = data[data.symbol.isin(['GARAN', 'TSKB'])]
@@ -74,7 +78,7 @@ if __name__ == '__main__':
     wavelet = False,
     ln = False, True
 
-    signal_func = signals.get_signal2, signals.get_signal
+    signal_func = signals.get_signal2
 
     
 
