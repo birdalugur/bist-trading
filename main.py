@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
 import time
 import multiprocessing
-import datetime
 from functools import partial
 import pandas as pd
 from itertools import combinations, permutations
@@ -14,9 +12,10 @@ import auxiliary as aux
 import signals
 
 start = time.time()
-folder_path = 'data/data_202010.csv'
+folder_path = '/home/ugur/bist_data/202011.csv'
 
 data = pd.read_csv(folder_path, parse_dates=['time'])
+data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
 
@@ -26,7 +25,7 @@ pair_names = list(combinations(data.symbol.unique(), 2))
 
 if reverse:
     all_pairs = list(permutations(data.symbol.unique(), 2))
-    pair_names = list(set(all_pairs)-set(pair_names))
+    pair_names = list(set(all_pairs) - set(pair_names))
 
 
 # data = data[data.symbol.isin(['GARAN', 'TSKB'])]
@@ -34,7 +33,7 @@ if reverse:
 
 def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     print(pair_name)
-
+    # pair_name = ('GARAN', 'TSKB')
     mid_freq = opt['mid_freq']
     window_size = opt['window_size']
     threshold = opt['threshold']
@@ -45,7 +44,10 @@ def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     pair_bid, pair_ask, pair_mid = aux.create_bid_ask_mid(pair_name, data)
 
     pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
-    pair_mid = pair_mid.resample('D').apply(aux.fill_nan).droplevel(0)
+    if 'D' in mid_freq:
+        pair_mid = pair_mid.ffill()
+    else:
+        pair_mid = pair_mid.resample('D').apply(aux.fill_nan).droplevel(0)
 
     if ln:
         pair_mid = np.log(pair_mid)
@@ -71,16 +73,14 @@ def parallel_run(core, pairs, opt, signal_func):
 
 if __name__ == '__main__':
     core = 8
-    mid_freq = '5Min', '2Min', '10Min'
-    window_size = 300,
+    mid_freq = '1D',
+    window_size = 7,
     threshold = 1,
     intercept = False,
     wavelet = False,
-    ln = False, True
+    ln = False,
 
     signal_func = signals.get_signal2
-
-    
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,
