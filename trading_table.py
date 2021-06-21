@@ -1,12 +1,11 @@
 import pandas as pd
 
 import residual
-import returns
 import rolling
 import signals
 
 
-def get_first_prices(ts, points):
+def get_first_prices(ts, points, mid_freq: str):
     """Verilen zamana ait ilk işlemi döndürür. İşlem yoksa NaN kabul edilir."""
 
     new_ts = pd.Series()
@@ -14,7 +13,10 @@ def get_first_prices(ts, points):
 
     for point in points:
         # t = point.strftime('%Y-%m-%d %H:%M')
-        t = str(point)
+        if 'D' in mid_freq:
+            t = point.date().__str__()
+        else:
+            t = str(point)
         x = ts[t]
 
         if len(x) == 0:
@@ -28,7 +30,8 @@ def get_first_prices(ts, points):
     return new_ts
 
 
-def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func):
+
+def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func, mid_freq):
     # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
     all_windows = rolling.windows(pair_mid, window_size)
     residuals = list(map(lambda w: residual.get_resid(w, intercept=intercept, wavelet=wavelet), all_windows))
@@ -59,17 +62,17 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # B'ler price 1 ' e
 
 
-    entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1)
-    entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2)
+    entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1, mid_freq)
+    entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2, mid_freq)
 
-    exit_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], exit_points_s1)
-    exit_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], exit_points_s2)
+    exit_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], exit_points_s1, mid_freq)
+    exit_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], exit_points_s2, mid_freq)
 
-    entry_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], entry_points_s1)
-    entry_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], entry_points_s2)
+    entry_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], entry_points_s1, mid_freq)
+    entry_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], entry_points_s2, mid_freq)
 
-    exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1)
-    exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
+    exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1, mid_freq)
+    exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2, mid_freq)
 
     buy1_entry = pd.DataFrame({'entry_price_1': entry_price_buy_1, 'entry_symbol_1': entry_price_buy_1.name})
     buy2_entry = pd.DataFrame({'entry_price_1': entry_price_buy_2, 'entry_symbol_1': entry_price_buy_2.name})

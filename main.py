@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+import os
 import time
 import multiprocessing
 from functools import partial
@@ -12,7 +13,7 @@ import auxiliary as aux
 import signals
 
 start = time.time()
-folder_path = '/home/ugur/bist_data/202011.csv'
+folder_path = 'data.csv'
 
 data = pd.read_csv(folder_path, parse_dates=['time'])
 data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
@@ -27,8 +28,8 @@ if reverse:
     all_pairs = list(permutations(data.symbol.unique(), 2))
     pair_names = list(set(all_pairs) - set(pair_names))
 
-
 # data = data[data.symbol.isin(['GARAN', 'TSKB'])]
+# pair_names = [('GARAN', 'TSKB')]
 
 
 def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
@@ -60,7 +61,7 @@ def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     pair_ask.dropna(inplace=True)
     pair_bid.dropna(inplace=True)
 
-    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func)
+    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func, mid_freq)
     return trade_table
 
 
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     wavelet = False,
     ln = False,
 
-    signal_func = signals.get_signal2
+    signal_func = signals.get_signal
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,
@@ -89,14 +90,17 @@ if __name__ == '__main__':
                          wavelet=wavelet,
                          ln=ln)
 
-    if isinstance(opts, dict):
-        opt = opts
-        df_trade_table = parallel_run(core, pair_names, opt, signal_func)
-        file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
-        df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+    if len(pair_names) == 1:
+        run(pair_names[0], opts[0], signal_func)
     else:
-        for opt in opts:
+        if isinstance(opts, dict):
+            opt = opts
             df_trade_table = parallel_run(core, pair_names, opt, signal_func)
             file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
             df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+        else:
+            for opt in opts:
+                df_trade_table = parallel_run(core, pair_names, opt, signal_func)
+                file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
+                df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
 print(time.time() - start)
