@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 import itertools
+import numpy as np
 
 
 def get_file_name(opt):
@@ -22,7 +23,7 @@ def create_time_range(df):
 
 def create_bid_ask_mid(pair, data):
     data_pair = data[data['symbol'].isin([pair[0], pair[1]])]
-    # print('mp ok!')
+    data_pair['mid_price'] = (data_pair['bid_price'] + data_pair['ask_price']) / 2
 
     bid_price = data_pair.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
     ask_price = data_pair.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='last')

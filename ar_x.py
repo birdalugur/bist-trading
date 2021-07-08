@@ -1,12 +1,13 @@
+import multiprocessing
+from itertools import combinations
+
 import pandas as pd
 import numpy as np
+from statsmodels.tsa.ar_model import AutoReg
+
 import signals
-import multiprocessing
-from functools import partial
-from itertools import combinations, permutations
 import auxiliary as aux
 import residual
-from statsmodels.tsa.ar_model import AutoReg
 
 path = ''
 pricesfilename = 'data_18m.csv'
@@ -47,7 +48,7 @@ def get_date_ranges(datetime_list: pd.DatetimeIndex, n: int) -> list:
     return datetime_ranges
 
 
-def auto_req(resids):
+def auto_req(resids: pd.Series) -> float:
     size = resids.dropna().__len__()
 
     if size < 3:
@@ -90,16 +91,16 @@ def auto_req(resids):
                 ratio = np.nan
         else:
             ratio = np.nan
-        if (cond1) & (cond2):
-            if (cond3) & (cond4):
-                print('computed')
-            else:
-                print('not computed')
-        else:
-            print('not computed')
+        # if (cond1) & (cond2):
+        #     if (cond3) & (cond4):
+        #         print('computed')
+        #     else:
+        #         print('not computed')
+        # else:
+        #     print('not computed')
     else:
         ratio = np.nan
-        print('not computed')
+        # print('not computed')
     return ratio
 
 
@@ -116,6 +117,7 @@ def ar_x(pair_data, datetime_ranges, _intercept, _wavelet):
 
 
 def run(pair_name):
+    print("Hesaplanan çift: ", pair_name)
     pair_bid, pair_ask, pair_mid = aux.create_bid_ask_mid(pair_name, data)
     pair_bid, pair_ask, pair_mid = aux.convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln)
     date_ranges = get_date_ranges(pair_mid.index, 3)
@@ -123,16 +125,16 @@ def run(pair_name):
     return arx_values
 
 
-def parallel_run(data, core):
-    pair_names = list(combinations(data.symbol.unique(), 2))
+def parallel_run(pair_names, core):
     pool = multiprocessing.Pool(processes=core)
-    ratioOUpartial = partial(ratioOU, data=data)
-    pair_names_sel = pair_names
-    result = pool.map(ratioOUpartial, pair_names_sel)
-    return pd.DataFrame(result, index=pair_names_sel)
+    result = pool.map(run, pair_names)
+    return result
 
 
-ratioOUmodelallpairs = ratioOU_allpairs(data, 8)
-ratioOUmodelallpairs.to_csv('ratios.csv')
+if __name__ == '__main__':
+    pair_names = list(combinations(data.symbol.unique(), 2))
+    pair_names = pair_names[:6]
+    all_arx = parallel_run(pair_names, 3)
 
-selectedpairs = ratioOUmodelallpairs.dropna().sort_values().tail(50).index
+
+# selectedpairs = ratioOUmodelallpairs.dropna().sort_values().tail(50).index
