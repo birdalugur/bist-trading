@@ -60,3 +60,25 @@ def fill_nan(x):
     x = x[:x.last_valid_index()]
     x = x.ffill()
     return x
+
+
+def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
+    """
+    Get the averages of mid price specified by mid_freq.
+    Fill Nan's with the value that comes before it (Except for the end of the day).
+    Removes the remaining nan.
+    """
+    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
+
+    pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
+    pair_ask = pair_ask.resample('D').apply(fill_nan).droplevel(0)
+    pair_bid = pair_bid.resample('D').apply(fill_nan).droplevel(0)
+
+    pair_mid.dropna(inplace=True)
+    pair_ask.dropna(inplace=True)
+    pair_bid.dropna(inplace=True)
+
+    if ln:
+        pair_mid = np.log(pair_mid)
+
+    return pair_bid, pair_ask, pair_mid
