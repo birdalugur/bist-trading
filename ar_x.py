@@ -10,15 +10,15 @@ import auxiliary as aux
 import residual
 
 path = ''
-pricesfilename = 'data_18m.csv'
+pricesfilename = 'test_data.csv'
 data = pd.read_csv(path + pricesfilename, parse_dates=['time'])
 data = data[data.time.dt.hour < 15]
 data['mid_price'] = (data['bid_price'] + data['ask_price']) / 2
 
 mid_freq = '5Min'
 ln = False
-window_size = 96
 threshold = 1
+step = 3
 intercept = False
 wavelet = False
 signal_func = signals.get_signal
@@ -54,7 +54,7 @@ def auto_req(resids: pd.Series) -> float:
     if size < 3:
         return None
 
-    ar_model = AutoReg(list(resids.dropna().cumsum()), lags=1).fit()
+    ar_model = AutoReg(list(resids.dropna().cumsum()), lags=1, old_names=False).fit()
     a = ar_model.params[0]
     b = ar_model.params[1]
     residuals_of_ar_model = ar_model.resid
@@ -120,21 +120,21 @@ def run(pair_name):
     print("Hesaplanan çift: ", pair_name)
     pair_bid, pair_ask, pair_mid = aux.create_bid_ask_mid(pair_name, data)
     pair_bid, pair_ask, pair_mid = aux.convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln)
-    date_ranges = get_date_ranges(pair_mid.index, 3)
+    date_ranges = get_date_ranges(pair_mid.index, step)
     arx_values = ar_x(pair_mid, date_ranges, intercept, wavelet)
     return arx_values
 
 
 def parallel_run(pair_names, core):
     pool = multiprocessing.Pool(processes=core)
-    result = pool.map(run, pair_names)
-    return result
+    all_arx = pool.map(run, pair_names)
+    all_arx = pd.concat(all_arx, axis=1)
+    all_arx.columns = pair_names
+    return all_arx
 
 
 if __name__ == '__main__':
+    # run(pair_name = ('THYAO', 'TSKB'))
     pair_names = list(combinations(data.symbol.unique(), 2))
-    pair_names = pair_names[:6]
-    all_arx = parallel_run(pair_names, 3)
-
-
-# selectedpairs = ratioOUmodelallpairs.dropna().sort_values().tail(50).index
+    result = parallel_run(pair_names, 8)
+    result.to_csv("Autoregressive_result.csv")
