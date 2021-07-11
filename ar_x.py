@@ -160,6 +160,5 @@ def parallel_run(pair_names, core):
 if __name__ == '__main__':
     # run(pair_name=('THYAO', 'TSKB'))
     pair_names = list(combinations(data.symbol.unique(), 2))
-    pair_names = pair_names[0:3]
     result = parallel_run(pair_names, 8)
     result.to_csv("Autoregressive_result.csv")
