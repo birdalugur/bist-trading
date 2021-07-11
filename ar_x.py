@@ -8,6 +8,7 @@ from statsmodels.tsa.ar_model import AutoReg
 import signals
 import auxiliary as aux
 import residual
+import lmts
 
 path = ''
 pricesfilename = 'test_data.csv'
@@ -106,13 +107,37 @@ def auto_req(resids: pd.Series) -> float:
 
 def ar_x(pair_data, datetime_ranges, _intercept, _wavelet):
     arx_list = []
+    elw_list = []
+    elw2s_list = []
+    gph_list = []
+    hou_perron_list = []
+    local_w_list = []
+
     for date_range in datetime_ranges:
         range_data = pair_data[date_range[0]:date_range[1]]
         residuals = residual.get_resid(range_data)
         arx_value = auto_req(residuals)
+        elw_value = lmts.elw(residuals)
+        elw2s_value = lmts.elw2s(residuals)
+        gph_value = lmts.gph(residuals)
+        hp_value = lmts.hou_perron(residuals)
+        lw_value = lmts.local_w(residuals)
         arx_list.append(arx_value)
+        elw_list.append(elw_value)
+        elw2s_list.append(elw2s_value)
+        gph_list.append(gph_value)
+        hou_perron_list.append(hp_value)
+        local_w_list.append(lw_value)
 
-    res = pd.Series(arx_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_arx = pd.Series(arx_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_elw = pd.Series(elw_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_elw2s = pd.Series(elw2s_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_gph = pd.Series(gph_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_hp = pd.Series(hou_perron_list, index=pd.DataFrame(datetime_ranges)[0].values)
+    res_lw = pd.Series(local_w_list, index=pd.DataFrame(datetime_ranges)[0].values)
+
+    res = pd.concat([res_arx, res_elw, res_elw2s, res_gph, res_hp, res_lw], axis=1)
+    res.columns = ["arx", "elw", "elw2s", "gph", "hp", "lw"]
     return res
 
 
@@ -128,13 +153,13 @@ def run(pair_name):
 def parallel_run(pair_names, core):
     pool = multiprocessing.Pool(processes=core)
     all_arx = pool.map(run, pair_names)
-    all_arx = pd.concat(all_arx, axis=1)
-    all_arx.columns = pair_names
+    all_arx = pd.concat(all_arx, axis=1, keys=pair_names)
     return all_arx
 
 
 if __name__ == '__main__':
-    # run(pair_name = ('THYAO', 'TSKB'))
+    # run(pair_name=('THYAO', 'TSKB'))
     pair_names = list(combinations(data.symbol.unique(), 2))
+    pair_names = pair_names[0:3]
     result = parallel_run(pair_names, 8)
     result.to_csv("Autoregressive_result.csv")
