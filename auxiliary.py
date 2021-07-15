@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 import itertools
+import numpy as np
 
 
 def get_file_name(opt):
@@ -22,7 +23,7 @@ def create_time_range(df):
 
 def create_bid_ask_mid(pair, data):
     data_pair = data[data['symbol'].isin([pair[0], pair[1]])]
-    # print('mp ok!')
+    data_pair['mid_price'] = (data_pair['bid_price'] + data_pair['ask_price']) / 2
 
     bid_price = data_pair.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
     ask_price = data_pair.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='last')
@@ -60,3 +61,25 @@ def fill_nan(x):
     x = x[:x.last_valid_index()]
     x = x.ffill()
     return x
+
+
+def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
+    """
+    Get the averages of mid price specified by mid_freq.
+    Fill Nan's with the value that comes before it (Except for the end of the day).
+    Removes the remaining nan.
+    """
+    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
+
+    pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
+    pair_ask = pair_ask.resample('D').apply(fill_nan).droplevel(0)
+    pair_bid = pair_bid.resample('D').apply(fill_nan).droplevel(0)
+
+    pair_mid.dropna(inplace=True)
+    pair_ask.dropna(inplace=True)
+    pair_bid.dropna(inplace=True)
+
+    if ln:
+        pair_mid = np.log(pair_mid)
+
+    return pair_bid, pair_ask, pair_mid
