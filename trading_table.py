@@ -30,7 +30,6 @@ def get_first_prices(ts, points, mid_freq: str):
     return new_ts
 
 
-
 def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func, mid_freq):
     # calculate residuals & std from windows >>>>>>>>>>>>>>>>>>>>>>>>>>
     all_windows = rolling.windows(pair_mid, window_size)
@@ -60,7 +59,6 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
 
     # S'ler price 2 ' ye
     # B'ler price 1 ' e
-
 
     entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1, mid_freq)
     entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2, mid_freq)

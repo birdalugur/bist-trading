@@ -6,17 +6,20 @@ import multiprocessing
 from functools import partial
 import pandas as pd
 from itertools import combinations, permutations
+import datetime
 
 from trading_table import trading_table
 import auxiliary as aux
 import signals
 
 start = time.time()
-folder_path = 'data.csv'
+folder_path = 'test_data.csv'
 
 data = pd.read_csv(folder_path, parse_dates=['time'])
-data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
-data = data[data.time.dt.hour < 15]
+# data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
+
+data = data[data.time.dt.time >= datetime.time(7, 00, 00)]
+data = data[data.time.dt.time <= datetime.time(14, 55, 00)]
 
 reverse = False
 
@@ -27,9 +30,11 @@ if reverse:
     pair_names = list(set(all_pairs) - set(pair_names))
 
 
+# pair_names = [('BIMAS', 'AKBNK')]
+
+
 def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     print(pair_name)
-    # pair_name = ('GARAN', 'TSKB')
     mid_freq = opt['mid_freq']
     window_size = opt['window_size']
     threshold = opt['threshold']
@@ -41,7 +46,8 @@ def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
 
     pair_bid, pair_ask, pair_mid = aux.convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln)
 
-    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func, mid_freq)
+    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func,
+                                mid_freq)
     return trade_table
 
 
@@ -54,8 +60,8 @@ def parallel_run(core, pairs, opt, signal_func):
 
 if __name__ == '__main__':
     core = 8
-    mid_freq = '1D',
-    window_size = 7,
+    mid_freq = '5Min',
+    window_size = 300,
     threshold = 1,
     intercept = False,
     wavelet = False,
@@ -71,7 +77,9 @@ if __name__ == '__main__':
                          ln=ln)
 
     if len(pair_names) == 1:
-        run(pair_names[0], opts[0], signal_func)
+        df_trade_table = run(pair_names[0], opts[0], signal_func)
+        file_name = aux.get_file_name(opts[0]) + '_signalFunc_' + signal_func.__name__
+        df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
     else:
         if isinstance(opts, dict):
             opt = opts

@@ -15,7 +15,7 @@ def get_file_name(opt):
 
 def create_time_range(df):
     day_list = sorted(df.time.dt.date.unique())
-    time_list = pd.date_range('7:00:00', '15:00:00', freq='s').time
+    time_list = pd.date_range('07:00:00', '15:00:00', freq='s').time
     day_and_times = [datetime.datetime.combine(i, j) for i in day_list for j in time_list]
     indexes = pd.DatetimeIndex(pd.to_datetime(day_and_times))
     return indexes
@@ -60,6 +60,7 @@ def multi_opt(mid_freq, window_size, threshold, intercept, wavelet, ln):
 def fill_nan(x):
     x = x[:x.last_valid_index()]
     x = x.ffill()
+    x = x.bfill()
     return x
 
 
@@ -69,7 +70,6 @@ def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
     Fill Nan's with the value that comes before it (Except for the end of the day).
     Removes the remaining nan.
     """
-    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
 
     pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
     pair_ask = pair_ask.resample('D').apply(fill_nan).droplevel(0)
@@ -78,6 +78,10 @@ def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
     pair_mid.dropna(inplace=True)
     pair_ask.dropna(inplace=True)
     pair_bid.dropna(inplace=True)
+
+    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
+
+
 
     if ln:
         pair_mid = np.log(pair_mid)

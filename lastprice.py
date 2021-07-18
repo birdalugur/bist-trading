@@ -8,6 +8,7 @@ pricesdf = pricesdf.drop_duplicates()
 
 pricesdf.dropna(inplace=True)
 
+pricesdf = pricesdf[pricesdf.time.dt.time >= time(7, 00, 00)]
 pricesdf = pricesdf[pricesdf.time.dt.time <= time(14, 55, 00)]
 
 pricesdf.time = pd.to_datetime(pricesdf.time)
