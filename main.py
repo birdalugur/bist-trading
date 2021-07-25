@@ -29,15 +29,15 @@ if reverse:
     all_pairs = list(permutations(data.symbol.unique(), 2))
     pair_names = list(set(all_pairs) - set(pair_names))
 
-
-# pair_names = [('BIMAS', 'AKBNK')]
+pair_names = [('BIMAS', 'AKBNK')]
 
 
 def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
     print(pair_name)
     mid_freq = opt['mid_freq']
     window_size = opt['window_size']
-    threshold = opt['threshold']
+    coeff_negative = opt['coeff_negative']
+    coeff_positive = opt['coeff_positive']
     intercept = opt['intercept']
     wavelet = opt['wavelet']
     ln = opt['ln']
@@ -46,8 +46,8 @@ def run(pair_name: str, opt: dict, signal_func) -> pd.DataFrame:
 
     pair_bid, pair_ask, pair_mid = aux.convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln)
 
-    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercept, wavelet, signal_func,
-                                mid_freq)
+    trade_table = trading_table(pair_mid, pair_ask, pair_bid, window_size, coeff_negative, coeff_positive, intercept,
+                                wavelet, signal_func, mid_freq)
     return trade_table
 
 
@@ -62,16 +62,19 @@ if __name__ == '__main__':
     core = 8
     mid_freq = '5Min',
     window_size = 300,
-    threshold = 1,
+    # threshold = 1,
+    coeff_negative = 1,
+    coeff_positive = 1,
     intercept = False,
     wavelet = False,
     ln = False,
 
-    signal_func = signals.get_signal
+    signal_func = signals.get_signal3
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,
-                         threshold=threshold,
+                         coeff_negative=coeff_negative,
+                         coeff_positive=coeff_positive,
                          intercept=intercept,
                          wavelet=wavelet,
                          ln=ln)

@@ -44,10 +44,10 @@ def create_bid_ask_mid(pair, data):
     return bid_price, ask_price, mid_price
 
 
-def multi_opt(mid_freq, window_size, threshold, intercept, wavelet, ln):
-    keys = ['mid_freq', 'window_size', 'threshold', 'intercept', 'wavelet', 'ln']
+def multi_opt(mid_freq, window_size, coeff_negative, coeff_positive, intercept, wavelet, ln):
+    keys = ['mid_freq', 'window_size', 'coeff_negative', 'coeff_positive', 'intercept', 'wavelet', 'ln']
 
-    opt_values = list(itertools.product(mid_freq, window_size, threshold, intercept, wavelet, ln))
+    opt_values = list(itertools.product(mid_freq, window_size, coeff_negative, coeff_positive, intercept, wavelet, ln))
 
     opt_dicts = []
 
