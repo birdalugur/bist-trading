@@ -13,6 +13,8 @@ import auxiliary as aux
 import signals
 
 start = time.time()
+
+path_app_data = "/home/ugur/bist_trading_project/app_data/"
 folder_path = 'test_data.csv'
 
 data = pd.read_csv(folder_path, parse_dates=['time'])
@@ -62,14 +64,13 @@ if __name__ == '__main__':
     core = 8
     mid_freq = '5Min',
     window_size = 300,
-    # threshold = 1,
     coeff_negative = 1,
     coeff_positive = 1,
     intercept = False,
     wavelet = False,
     ln = False,
 
-    signal_func = signals.get_signal3
+    signal_func = signals.get_signal
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,

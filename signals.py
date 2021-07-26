@@ -2,61 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def get_signal(residuals: pd.Series, thresholds: pd.Series, coeff: int) -> pd.DataFrame:
-    """
-    Residual, standart sapmayı geçince sinyal aç. İşaret ++ ise signal_1=True, -- ise signal_2=True.
-    Resid > std ve işaret değişimi yoksa mevcut sinyallerin durumunu koru.
-    Önceki işleme göre işaret değişirse ve resid < std ise her iki sinyal kapatılır.
-    Önceki işleme göre işaret değişirse ve resid > std ise her bir sinyal kapatılırken diğeri açılır.
-
-    """
-    signal_1, signal_2 = [], []
-
-    signal1, signal2 = False, False
-
-    prev_sign = 0
-
-    nan_lock = 1
-
-    idx = residuals.index
-
-    thresholds = thresholds * coeff
-
-    for residual, threshold in zip(residuals, thresholds):
-
-        sign = np.sign(residual)
-
-        if abs(residual) > threshold:
-            nan_lock = 0
-            prev_sign = sign
-            if sign == 1:
-                signal1 = True
-                signal2 = False
-            else:
-                signal1 = False
-                signal2 = True
-        else:
-            if sign == prev_sign:
-                pass
-            else:
-                prev_sign = sign
-                signal1 = False
-                signal2 = False
-            if nan_lock == 1:
-                signal1 = np.nan
-                signal2 = np.nan
-        signal_1.append(signal1)
-        signal_2.append(signal2)
-
-    signal_1 = pd.Series(signal_1, index=idx, name='signal_1').replace({False: 0, True: 1})
-    signal_2 = pd.Series(signal_2, index=idx, name='signal_2').replace({False: 0, True: 1})
-
-    signal1, signal2 = signal_1.shift(), signal_2.shift()
-
-    return pd.DataFrame({'signal1': signal1, 'signal2': signal2})
-
-
-def get_signal3(residuals: pd.Series, thresholds: pd.Series, coeff_negative: int, coeff_positive: int) -> pd.DataFrame:
+def get_signal(residuals: pd.Series, thresholds: pd.Series, coeff_negative: int, coeff_positive: int) -> pd.DataFrame:
     """
     Residual, standart sapmayı geçince sinyal aç. İşaret ++ ise signal_1=True, -- ise signal_2=True.
     Resid > std ve işaret değişimi yoksa mevcut sinyallerin durumunu koru.
@@ -119,6 +65,7 @@ def get_signal3(residuals: pd.Series, thresholds: pd.Series, coeff_negative: int
 
 
 def get_signal2(residuals, std, coeff: int):
+    # TODO: must be edited according to the threshold coefficients.
     list_signal1, list_signal2 = [], []
 
     idx = residuals.index
