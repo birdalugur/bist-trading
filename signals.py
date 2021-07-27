@@ -64,13 +64,15 @@ def get_signal(residuals: pd.Series, thresholds: pd.Series, coeff_negative: int,
     return result
 
 
-def get_signal2(residuals, std, coeff: int):
+def get_signal2(residuals, thresholds, coeff_negative: int, coeff_positive: int):
     # TODO: must be edited according to the threshold coefficients.
     list_signal1, list_signal2 = [], []
 
     idx = residuals.index
 
-    std = std * coeff
+    thresholds_positive = thresholds * coeff_negative
+
+    thresholds_negative = thresholds * coeff_positive
 
     number_of_nans = residuals.isna().value_counts()[True]
 
@@ -78,23 +80,38 @@ def get_signal2(residuals, std, coeff: int):
         list_signal1.append(np.nan)
         list_signal2.append(np.nan)
 
-    is_prev_above_std = False
     prev_sign = np.sign(residuals[number_of_nans])
 
     signal1, signal2 = 0, 0
 
-    if residuals[number_of_nans] > std[number_of_nans]:
+    if prev_sign == 1:
+        thresholds = thresholds_positive
+    else:
+        thresholds = thresholds_negative
+    if residuals[number_of_nans] > thresholds[number_of_nans]:
         is_prev_above_std = True
+    else:
+        is_prev_above_std = False
 
     list_signal1.append(signal1)
     list_signal2.append(signal2)
 
-    for _res, _std in zip(residuals[number_of_nans + 1:], std[number_of_nans + 1:]):
+    residual_without_nan = residuals[number_of_nans + 1:]
+    thresholds_positive = thresholds_positive[number_of_nans + 1:]
+    thresholds_negative = thresholds_negative[number_of_nans + 1:]
 
+    for i in range(len(residual_without_nan)):
+        _res = residual_without_nan.iloc[i]
         current_sign = np.sign(_res)
+        if current_sign == 1:
+            thresholds = thresholds_positive
+        else:
+            thresholds = thresholds_negative
+
+        threshold = thresholds.iloc[i]
 
         if current_sign == prev_sign:
-            if (abs(_res) < _std) and is_prev_above_std:
+            if (abs(_res) < threshold) and is_prev_above_std:
                 if current_sign == 1:
                     signal1 = 1
                     signal2 = 0
@@ -106,7 +123,7 @@ def get_signal2(residuals, std, coeff: int):
             signal2 = 0
             prev_sign = current_sign
 
-        if abs(_res) > _std:
+        if abs(_res) > threshold:
             is_prev_above_std = True
         else:
             is_prev_above_std = False
@@ -114,7 +131,9 @@ def get_signal2(residuals, std, coeff: int):
         list_signal1.append(signal1)
         list_signal2.append(signal2)
 
-    return pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2}, index=idx)
+    result = pd.DataFrame({'signal1': list_signal1, 'signal2': list_signal2}, index=idx)
+
+    return result
 
 
 def signal_points(signal: pd.Series) -> [pd.Index, pd.Index]:

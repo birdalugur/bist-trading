@@ -15,9 +15,9 @@ import signals
 start = time.time()
 
 path_app_data = "/home/ugur/bist_trading_project/app_data/"
-folder_path = 'test_data.csv'
+path_input_data = 'test_data.csv'
 
-data = pd.read_csv(folder_path, parse_dates=['time'])
+data = pd.read_csv(path_app_data+path_input_data, parse_dates=['time'])
 # data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
 
 data = data[data.time.dt.time >= datetime.time(7, 00, 00)]
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     wavelet = False,
     ln = False,
 
-    signal_func = signals.get_signal
+    signal_func = signals.get_signal2
 
     opts = aux.multi_opt(mid_freq=mid_freq,
                          window_size=window_size,
