@@ -65,7 +65,6 @@ def get_signal(residuals: pd.Series, thresholds: pd.Series, coeff_negative: int,
 
 
 def get_signal2(residuals, thresholds, coeff_negative: int, coeff_positive: int):
-    # TODO: must be edited according to the threshold coefficients.
     list_signal1, list_signal2 = [], []
 
     idx = residuals.index

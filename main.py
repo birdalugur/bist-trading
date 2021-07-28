@@ -17,7 +17,7 @@ start = time.time()
 path_app_data = "/home/ugur/bist_trading_project/app_data/"
 path_input_data = 'test_data.csv'
 
-data = pd.read_csv(path_app_data+path_input_data, parse_dates=['time'])
+data = pd.read_csv(path_app_data + path_input_data, parse_dates=['time'])
 # data.time = data.time.apply(lambda x: pd.Timestamp(int(x)))
 
 data = data[data.time.dt.time >= datetime.time(7, 00, 00)]
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     core = 8
     mid_freq = '5Min',
     window_size = 300,
-    coeff_negative = 1,
+    coeff_negative = 2,
     coeff_positive = 1,
     intercept = False,
     wavelet = False,
@@ -83,16 +83,16 @@ if __name__ == '__main__':
     if len(pair_names) == 1:
         df_trade_table = run(pair_names[0], opts[0], signal_func)
         file_name = aux.get_file_name(opts[0]) + '_signalFunc_' + signal_func.__name__
-        df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+        df_trade_table.to_csv(path_app_data + file_name + '_tradeTable' + '.csv', index=False)
     else:
         if isinstance(opts, dict):
             opt = opts
             df_trade_table = parallel_run(core, pair_names, opt, signal_func)
             file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
-            df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+            df_trade_table.to_csv(path_app_data + file_name + '_tradeTable' + '.csv', index=False)
         else:
             for opt in opts:
                 df_trade_table = parallel_run(core, pair_names, opt, signal_func)
                 file_name = aux.get_file_name(opt) + '_signalFunc_' + signal_func.__name__
-                df_trade_table.to_csv(file_name + '_tradeTable' + '.csv', index=False)
+                df_trade_table.to_csv(path_app_data + file_name + '_tradeTable' + '.csv', index=False)
 print(time.time() - start)
