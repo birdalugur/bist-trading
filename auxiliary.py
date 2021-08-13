@@ -71,6 +71,8 @@ def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
     Removes the remaining nan.
     """
 
+    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
+
     pair_mid = pair_mid.resample('D').apply(fill_nan).droplevel(0)
     pair_ask = pair_ask.resample('D').apply(fill_nan).droplevel(0)
     pair_bid = pair_bid.resample('D').apply(fill_nan).droplevel(0)
@@ -78,10 +80,6 @@ def convert_bid_ask_mid(pair_bid, pair_ask, pair_mid, mid_freq, ln):
     pair_mid.dropna(inplace=True)
     pair_ask.dropna(inplace=True)
     pair_bid.dropna(inplace=True)
-
-    pair_mid = pair_mid.groupby(pd.Grouper(freq='D')).resample(mid_freq).mean().droplevel(0)
-
-
 
     if ln:
         pair_mid = np.log(pair_mid)
