@@ -28,10 +28,8 @@ def create_bid_ask_mid(pair, data):
     bid_price = data_pair.pivot_table(index='time', columns='symbol', values='bid_price', aggfunc='last')
     ask_price = data_pair.pivot_table(index='time', columns='symbol', values='ask_price', aggfunc='last')
     mid_price = data_pair.pivot_table(index='time', columns='symbol', values='mid_price', aggfunc='mean')
-    # print('pivot ok!')
-    time_range = create_time_range(data)
 
-    # del (data, folder_path)
+    time_range = create_time_range(data)
 
     bid_index = bid_price.index.append(time_range).drop_duplicates().sort_values()
     ask_index = ask_price.index.append(time_range).drop_duplicates().sort_values()
@@ -58,7 +56,8 @@ def multi_opt(mid_freq, window_size, coeff_negative, coeff_positive, intercept, 
 
 
 def fill_nan(x):
-    x = x[:x.last_valid_index()]
+    # Gun sonlarını doldurmamak için asagidaki kod acilmali
+    # x = x[:x.last_valid_index()]
     x = x.ffill()
     x = x.bfill()
     return x
