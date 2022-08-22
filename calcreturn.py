@@ -1,10 +1,7 @@
 import pandas as pd
-from itertools import combinations
 import numpy as np
 
-from trading_table import trading_table
 import auxiliary as aux
-
 import residual
 import returns
 import rolling

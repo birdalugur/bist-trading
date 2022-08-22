@@ -1,7 +1,6 @@
 import pandas as pd
 
 import residual
-import returns
 import rolling
 import signals
 
@@ -58,18 +57,17 @@ def trading_table(pair_mid, pair_ask, pair_bid, window_size, threshold, intercep
     # S'ler price 2 ' ye
     # B'ler price 1 ' e
 
-
     entry_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], entry_points_s1)
-    entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2)
+    entry_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], entry_points_s1)
+
+    exit_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], exit_points_s2)
+    exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
 
     exit_price_buy_1 = get_first_prices(pair_ask.iloc[:, 1], exit_points_s1)
-    exit_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], exit_points_s2)
-
-    entry_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], entry_points_s1)
-    entry_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], entry_points_s2)
-
     exit_price_sell_1 = get_first_prices(pair_bid.iloc[:, 0], exit_points_s1)
-    exit_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], exit_points_s2)
+
+    entry_price_sell_2 = get_first_prices(pair_bid.iloc[:, 1], entry_points_s2)
+    entry_price_buy_2 = get_first_prices(pair_ask.iloc[:, 0], entry_points_s2)
 
     buy1_entry = pd.DataFrame({'entry_price_1': entry_price_buy_1, 'entry_symbol_1': entry_price_buy_1.name})
     buy2_entry = pd.DataFrame({'entry_price_1': entry_price_buy_2, 'entry_symbol_1': entry_price_buy_2.name})

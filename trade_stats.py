@@ -1,12 +1,17 @@
 import pandas as pd
 
-path = "compare files/mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_ln_False_tradeTable.csv"
+path = "mid_freq_5Min_window_size_300_threshold_1_intercept_False_wavelet_False_ln_False_tradeTable.csv"
 
 data = pd.read_csv(path, parse_dates=['exit time', 'entry time'])
 
 # Return hesapla
-data['long'] = (data['exit_price_1'] - data['entry_price_1']) * 100
-data['short'] = -(data['exit_price_2'] - data['entry_price_2']) * 100
+# data['long'] = (data['exit_price_1'] - data['entry_price_1']) * 100
+# data['short'] = -(data['exit_price_2'] - data['entry_price_2']) * 100
+# data['return'] = data['long'] + data['short']
+
+
+data['long'] = (data['exit_price_1'] - data['entry_price_1']) / data['entry_price_1']
+data['short'] = -(data['exit_price_2'] - data['entry_price_2']) / data['entry_price_2']
 data['return'] = data['long'] + data['short']
 
 # Cumulative return hesapla
@@ -54,5 +59,14 @@ number_of_pairs = data.count()
 
 summary = pd.DataFrame([average, avg_positive, avg_20, num_positive, number_of_pairs],
                        index=['avg', 'positive_avg', 'first_20_avg', 'number_of_positive_pair', 'number_of_pairs'])
+
+
+summary = summary.unstack().reset_index()
+
+cols = summary['level_0'] + '_' + summary['level_1']
+
+vals= summary[0].values.reshape(1,-1)
+
+summary = pd.DataFrame(vals, columns=cols)
 
 summary.to_csv('summary_' + path)

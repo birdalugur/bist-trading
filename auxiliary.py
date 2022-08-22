@@ -40,6 +40,9 @@ def create_bid_ask_mid(pair, data):
     ask_price = ask_price.reindex(ask_index)
     mid_price = mid_price.reindex(mid_index)
 
+    bid_price = bid_price.loc[:, pair]
+    ask_price = ask_price.loc[:, pair]
+    mid_price = mid_price.loc[:, pair]
     return bid_price, ask_price, mid_price
 
 
